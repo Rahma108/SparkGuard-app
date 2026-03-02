@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 import nodemailer from 'nodemailer'
 import { GMAIL  , PASSWORD} from '../../../../config/config.service.js'
@@ -28,4 +29,3 @@ export const sendOTP = async (email , otp)=>{
         console.log("Email error :" , error );
         throw new Error("Failed to send OTP email")
     }
-}

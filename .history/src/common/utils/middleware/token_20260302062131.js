@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 import { verifyToken } from "../security/jwt.js";
 
@@ -14,4 +15,3 @@ export const authenticateUser = async (req , res , next)=>{
     const decoded = verifyToken(token)
     req.userId = decoded.userId; 
     next();  //Middleware .........
-}

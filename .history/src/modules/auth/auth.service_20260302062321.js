@@ -1,4 +1,4 @@
-
+<<<<<<< HEAD
 // logic--- queries ....
 
 export const signup =async (inputs)=>{

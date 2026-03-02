@@ -1,4 +1,4 @@
-
+<<<<<<< HEAD
 // npm i bcrypt to hash password ....
 
 // Don’t forget to hash the password 

@@ -1,4 +1,4 @@
-
+<<<<<<< HEAD
 // logic--- queries ....
 
 export const signup =async (inputs)=>{
@@ -7,4 +7,3 @@ export const signup =async (inputs)=>{
 
 export const login = async(inputs)=>{
    return []
-}

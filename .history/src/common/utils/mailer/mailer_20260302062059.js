@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 import nodemailer from 'nodemailer'
 import { GMAIL  , PASSWORD} from '../../../../config/config.service.js'

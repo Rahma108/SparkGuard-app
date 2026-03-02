@@ -1,4 +1,4 @@
-
+<<<<<<< HEAD
 //encrypt the phone
 
 // crypto..

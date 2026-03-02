@@ -1,4 +1,4 @@
-
+<<<<<<< HEAD
 import {Router} from 'express'
 import { profile } from './user.service.js'
 

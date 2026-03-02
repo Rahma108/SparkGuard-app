@@ -1,4 +1,4 @@
-
+<<<<<<< HEAD
 // Connect to db .........................
 import mongoose from "mongoose";
 
