@@ -6,9 +6,13 @@ deep learning model.
 🛠 Tech Stack
 
 Node.js
+
 Express.js
+
 MongoDB
+
 Mongoose
+
 JWT Authentication
 
 ⚙️ Run Code:
