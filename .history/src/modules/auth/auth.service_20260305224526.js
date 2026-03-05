@@ -3,7 +3,7 @@
 import { create, findOne, UserModel } from "../../DB/index.js"
 import { ProviderEnum } from "../../common/enums/user.enum.js"
 import { ConflictException, NotFoundException} from "../../common/utils/response/index.js"
-import {  generateHash  , encrypt, decrypt, compareHash, createLoginCredentials} from "../../common/utils/security/index.js"
+import {  generateHash  , encrypt, decrypt} from "../../common/utils/security/index.js"
 import { sendOtpFunction } from "../otp/otp.service.js"
 export const signup = async (inputs)=>{
   // UserName , email , password , confirmPassword  , phone required , gender optional , role optional
@@ -29,7 +29,7 @@ export const signup = async (inputs)=>{
    return user
 }
 
-export const login = async(inputs , issuer)=>{
+export const login = async(inputs)=>{
   const {email , password} = inputs 
   const user = await findOne({
     model:UserModel ,
@@ -41,10 +41,18 @@ export const login = async(inputs , issuer)=>{
   //Decrypt Phone
   user.phone = decrypt(user.phone)
   //Hash Password
-  const match = await compareHash(password , user.password )
+        const match = await compareHash(password , user.password )
   if(!match){
         throw NotFoundException({message : "Invalid Login Credentials .❌"})
   }
       // Token 
-  return await createLoginCredentials(user , issuer)
+      return await createLoginCredentials(user , issuer)
+  
+
+
+
+
+  
+  return []
+
 }

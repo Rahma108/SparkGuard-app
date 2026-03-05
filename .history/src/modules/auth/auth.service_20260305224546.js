@@ -29,7 +29,7 @@ export const signup = async (inputs)=>{
    return user
 }
 
-export const login = async(inputs , issuer)=>{
+export const login = async(inputs)=>{
   const {email , password} = inputs 
   const user = await findOne({
     model:UserModel ,
@@ -47,4 +47,12 @@ export const login = async(inputs , issuer)=>{
   }
       // Token 
   return await createLoginCredentials(user , issuer)
+  
+
+
+
+
+  
+  return []
+
 }

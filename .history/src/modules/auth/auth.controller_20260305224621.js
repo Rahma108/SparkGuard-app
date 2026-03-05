@@ -10,7 +10,7 @@ router.post('/signup', validation(validators.signupSchema) , async(req , res , n
     return successResponse({res , status:201 , result})
 })
 
-router.post('/login',validation(validators.loginSchema), async(req , res , next )=>{
+router.post('/login' ,  authentication(TokenTypeEnum.refresh) ,authorization(endPoint.profile),validation(validators.loginSchema), async(req , res , next )=>{
 
     const result = await login(req.body , `${req.protocol}://${req.host}`)
     return successResponse({res ,  result})
