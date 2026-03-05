@@ -24,7 +24,8 @@ export const signup = async (inputs)=>{
   const [user] = await create({ model:UserModel 
     , data : [{userName , email , password: await generateHash(password) , gender , phone : encrypt(phone) 
         , Provider: ProviderEnum.System  , role:role }] })
-    // Send a verification code to email after registration
+  //send otp
+     // Send a verification code to email after registration
         await sendOtpFunction({ email: user.email });
    return user
 }

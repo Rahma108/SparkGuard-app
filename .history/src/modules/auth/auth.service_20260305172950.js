@@ -1,10 +1,10 @@
 
 // logic--- queries ....
-import { create, findOne, UserModel } from "../../DB/index.js"
+import { UserModel } from "../../DB/index.js"
 import { ProviderEnum } from "../../common/enums/user.enum.js"
-import { ConflictException} from "../../common/utils/response/index.js"
-import {  generateHash  , encrypt} from "../../common/utils/security/index.js"
-import { sendOtpFunction } from "../otp/otp.service.js"
+import { BadRequestException, ConflictException, NotFoundException } from "../../common/utils/response/index.js"
+import { compareHash, generateHash  , encrypt , decrypt, createLoginCredentials} from "../../common/utils/security/index.js"
+
 export const signup = async (inputs)=>{
   // UserName , email , password , confirmPassword  , phone required , gender optional , role optional
   const {userName , email ,  password , phone , gender , role  } = inputs 
@@ -24,9 +24,10 @@ export const signup = async (inputs)=>{
   const [user] = await create({ model:UserModel 
     , data : [{userName , email , password: await generateHash(password) , gender , phone : encrypt(phone) 
         , Provider: ProviderEnum.System  , role:role }] })
-    // Send a verification code to email after registration
-        await sendOtpFunction({ email: user.email });
-   return user
+  //send otp
+  
+  
+  return []
 }
 
 export const login = async(inputs)=>{
