@@ -1,0 +1,95 @@
+import mongoose from "mongoose";
+import { GenderEnum, ProviderEnum } from "../../common/enums/user.enum.js";
+
+const userSchema = new mongoose.Schema({
+    firstName : {
+        type : String ,
+        required: function() { return this.provider === ProviderEnum.System }, 
+            minLength:[2 , "FirstName cannot be less than 2 characters, you entered {VALUE}"] ,
+            maxLength: 25 , 
+            trim : true 
+    } , 
+    lastName :{
+        type:String , 
+        required: function() { return this.provider === ProviderEnum.System },
+        minLength:[2 , "LastName cannot be less than 2 characters, you entered {VALUE}"] ,
+        maxLength: 25 , 
+        trim : true 
+    },
+    email :{
+            type:String , 
+            required:true , 
+            unique:true ,
+        },
+    password :{
+        type:String ,
+            required:function(){
+                    return this.provider === ProviderEnum.System
+        }
+        },
+        gender:{
+            type:Number, 
+            enum :Object.values(GenderEnum),
+            default : GenderEnum.Male 
+        },
+        phone:{
+            type:String
+        },
+        confirmEmail:{
+            type:Date
+        },
+        provider:{
+            type:Number , 
+            enum : Object.values(ProviderEnum),
+            default : ProviderEnum.System
+        },
+        role:{
+            type:Number , 
+            enum : Object.values(RoleEnum),
+            default : RoleEnum.User
+        },
+        changeCredentialTime: {
+            type:Date
+        },
+        profilePicture : {
+            type:String
+        },
+        coverProfilePicture : {
+            type:[String]
+        },
+
+
+
+
+
+
+
+
+
+
+},{
+
+
+
+
+
+
+
+
+
+
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,12 +1,7 @@
 
-//encrypt the phone
-
-// crypto..
 import crypto from 'crypto'  // built in 
 
 // phone --> encrypt  ..
-                     // AES ...
-//  Function to encrypt data
 export const EncryptPhone = async function encrypt(text, key) {
     // Generate a random initialization vector
     const iv = crypto.randomBytes(16);
