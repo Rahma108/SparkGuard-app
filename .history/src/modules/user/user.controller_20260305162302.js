@@ -6,7 +6,7 @@ import { successResponse } from '../../common/utils/response/success.response.js
 const router = Router() // app
 router.get('/' , (req , res , next )=>{
     const result = profile(req.query.id)
-    return successResponse({res , result})
+    return successResponse({res , })
 })
 export default router
 
