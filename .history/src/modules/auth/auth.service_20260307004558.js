@@ -1,6 +1,5 @@
 
 // logic--- queries ....
-import { ClientID } from "../../../config/config.service.js"
 import { create, findOne, UserModel } from "../../DB/index.js"
 import { ProviderEnum } from "../../common/enums/user.enum.js"
 import { ConflictException, NotFoundException} from "../../common/utils/response/index.js"
