@@ -40,7 +40,7 @@ export const login = async(inputs , issuer)=>{
     throw NotFoundException({message:"Invalid Login Credentials ❌"})
   }
   //Decrypt Phone
-  if (user.phone) user.phone = decrypt(user.phone);
+  user.phone = decrypt(user.phone)
   //Hash Password
   const match = await compareHash(password , user.password )
   if(!match){

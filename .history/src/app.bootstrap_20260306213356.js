@@ -16,7 +16,7 @@ const app = express()
 
 // convert buffer data .....................
 app.use(express.json());
-app.use(cors())
+app.use(cors() , express.json())
 
 // DB ....
 await connectDB()

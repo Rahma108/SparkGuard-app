@@ -33,8 +33,7 @@ const userSchema = new mongoose.Schema({
             default : GenderEnum.Male 
         },
         phone:{
-            type:String ,
-            default:""
+            type:String 
         },
         confirmEmail:{
             type:Date

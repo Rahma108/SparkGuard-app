@@ -5,6 +5,7 @@ import joi from 'joi'
 export const loginSchema = {
     body:joi.object().keys({
     email : joi.string().email({minDomainSegments:2 , maxDomainSegments:3 , tlds:{allow:['com', 'edu' , 'net']}}).required(),
+   
     password:joi.string().pattern(new RegExp(/^(?=.*[a-z]){1,}(?=.*[A-Z]){1,}(?=.*\d){1,}(?=.*\W){1,}[\w\W\d].{8,25}$/)),
 }).required()
 

@@ -5,8 +5,8 @@ import { successResponse } from '../../common/utils/response/success.response.js
 import * as validators from './auth.validation.js'
 import { validation } from '../../common/utils/middleware/validation.middleware.js'
 const router = Router() 
-// 
-router.post('/signup', validation(validators.signupSchema) , async(req , res , next )=>{
+, validation(validators.signupSchema) ,
+router.post('/signup', async(req , res , next )=>{
     const result = await signup(req.body)
     return successResponse({res , status:201 , result})
 })

@@ -1,4 +1,8 @@
 
+import { BadRequestException } from "../response/error.response.js"
+
+
+
 // logic--- queries ....
 import { create, findOne, UserModel } from "../../DB/index.js"
 import { ProviderEnum } from "../../common/enums/user.enum.js"
@@ -27,25 +31,4 @@ export const signup = async (inputs)=>{
     // Send a verification code to email after registration
         await sendOtpFunction({ email: user.email });
    return user
-}
-
-
-export const login = async(inputs , issuer)=>{
-  const {email , password} = inputs 
-  const user = await findOne({
-    model:UserModel ,
-    filter:{email ,Provider:ProviderEnum.System}
-  })
-  if(!user){
-    throw NotFoundException({message:"Invalid Login Credentials ❌"})
-  }
-  //Decrypt Phone
-  if (user.phone) user.phone = decrypt(user.phone);
-  //Hash Password
-  const match = await compareHash(password , user.password )
-  if(!match){
-        throw NotFoundException({message : "Invalid Login Credentials .❌"})
-  }
-      // Token 
-  return await createLoginCredentials(user , issuer)
 }

@@ -5,7 +5,7 @@ export const profile= async  (user)=>{
       if (!user) {
     throw new Error("User not found");
   }
-   if (user.phone) user.phone = decrypt(user.phone);
+if (user.phone) user.phone = decrypt(user.phone);
     return user
 }
 
