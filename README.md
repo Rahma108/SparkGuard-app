@@ -16,4 +16,7 @@ Mongoose
 JWT Authentication
 
 ⚙️ Run Code:
+npm install
 npm run start-dev
+
+Documentation EndPoints: https://api-docs.hoppscotch.io/view/573ddd5a-5cdf-43cf-a6a9-0c5501dfb614/CURRENT
