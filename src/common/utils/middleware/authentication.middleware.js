@@ -21,7 +21,9 @@ export const authentication =  ( tokenType = TokenTypeEnum.access )=>{
                         console.log({username , password});
                     break;
                 case 'Bearer':
-                        req.user=  await decodeToken({token : credentials , tokenType })
+                    const {user , decoded}=  await decodeToken({token : credentials , tokenType })
+                    req.user = user
+                    req.decoded= decoded
 
                     break;
             
@@ -29,9 +31,13 @@ export const authentication =  ( tokenType = TokenTypeEnum.access )=>{
                     break;
             }
     
-
+            if (!req.user || !req.decoded) {
+                throw BadRequestException({ message: "Invalid or missing token" });
+}
             next()
         
 
     }
 }
+
+
