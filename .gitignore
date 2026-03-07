@@ -1,2 +1,5 @@
 ./config/.env.dev
 ./config/.env.prod
+node_modules/
+.history/
+.postman/
