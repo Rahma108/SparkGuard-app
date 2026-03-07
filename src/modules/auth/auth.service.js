@@ -1,7 +1,7 @@
 
 // logic--- queries ....
 import { ClientID } from "../../../config/config.service.js"
-import { create, findOne, UserModel } from "../../DB/index.js"
+import { create, createOne, findOne, UserModel } from "../../DB/index.js"
 import { ProviderEnum } from "../../common/enums/user.enum.js"
 import { ConflictException, NotFoundException} from "../../common/utils/response/index.js"
 import {  generateHash  , encrypt, decrypt, compareHash, createLoginCredentials} from "../../common/utils/security/index.js"
@@ -23,7 +23,7 @@ export const signup = async (inputs)=>{
   }
   // Store
   const [user] = await create({ model:UserModel 
-    , data : [{userName , email , password: await generateHash(password) , gender , phone : encrypt(phone) 
+    , data : [{userName , email , password: await generateHash(password) , gender , phone : phone ? encrypt(phone) : null
         , Provider: ProviderEnum.System  , role:role }] })
     // Send a verification code to email after registration
         await sendOtpFunction({ email: user.email });
