@@ -7,12 +7,37 @@ import { TokenModel } from '../../DB/model/index.js';
 import { REFRESH_EXPIRES_IN } from '../../../config/config.service.js';
 import { LogoutEnum } from '../../common/enums/security.enum.js';
 import { decrypt } from "../../common/utils/index.js";
+
+export const dashboard = async () => {
+    const data = {
+        totalScans: 0,
+        gridHealth: "98%",
+        aiAccuracy: "94.2%",
+        region: "Zone-A"
+    }
+
+    return data
+}
 export const profile= async  (user)=>{
-      if (!user) {
+    if (!user) {
     throw new Error("User not found");
-  }
-   if (user.phone) user.phone = decrypt(user.phone);
-    return user
+    }
+    if (user.phone) user.phone = decrypt(user.phone);
+    return  {userName: user.userName,
+    email: user.email}
+}
+
+export const updatedProfile= async  (user , data)=>{
+    const { userName } =data
+    if (!userName) {
+        throw new Error("userName is required")
+    }
+    user.userName = userName
+    await user.save()
+    return {
+        userName: user.userName,
+        email: user.email
+    }
 }
 
 export const rotateToken = async  (user, issuer)=>{

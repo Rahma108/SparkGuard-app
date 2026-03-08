@@ -27,7 +27,7 @@ export const signup = async (inputs)=>{
         , Provider: ProviderEnum.System  , role:role }] })
     // Send a verification code to email after registration
         await sendOtpFunction({ email: user.email });
-   return user
+   return {userName , email ,  password:user.password , phone , gender}
 }
 
 
