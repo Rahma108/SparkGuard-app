@@ -4,7 +4,7 @@ import { ClientID } from "../../../config/config.service.js"
 import { create, createOne, findOne, UserModel } from "../../DB/index.js"
 import { ProviderEnum } from "../../common/enums/user.enum.js"
 import { deleteKeys, get, increment, keys, otpBlockKey, otpKey, otpMaxRequestKey, set, ttl} from "../../common/services/index.js"
-import { createNumberOtp, emailTemplate, sendEmail } from "../../common/utils/index.js"
+import { createNumberOtp, emailEmitter} from "../../common/utils/index.js"
 import { ConflictException, NotFoundException} from "../../common/utils/response/index.js"
 import {  generateHash , compareHash, createLoginCredentials} from "../../common/utils/security/index.js"
 export const generateAndSendConfirmEmailOtp = async(email)=>{
@@ -30,16 +30,11 @@ export const generateAndSendConfirmEmailOtp = async(email)=>{
         const code = await createNumberOtp()
         await set({
           key: otpKey(email) , 
-          value : await generateHash( `${code}` )
+          value : await generateHash(code.toString())
         , ttl: 120
       })
       checkOtpMaxRequest  > 0 ? await increment(maxTrialKey): await set({key : maxTrialKey , value : 1 , ttl : 300 })
-        await sendEmail({
-          to : email,
-          subject: "confirmEmail",
-          html:emailTemplate(code , "confirm-Email" )
-
-        })
+      emailEmitter.emit("Confirm_Email" , {to:email , subject:"Confirm_Email" ,code:code.toString() , title:"Confirm_Email"})
       return ;
 }
 export const signup = async (inputs)=>{
