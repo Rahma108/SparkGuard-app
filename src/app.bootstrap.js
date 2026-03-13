@@ -1,15 +1,10 @@
 
-
 import express from 'express'
-
-import { authRouter , otpRouter, userRouter  } from './modules/index.js'
-// file config ............................................
+import { authRouter , userRouter  } from './modules/index.js'
 import { NODE_ENV, port } from '../config/config.service.js'
 import { GlobalError } from './common/utils/response/error.response.js';
-import { connectDB } from './DB/connection.db.js';
 import cors from 'cors'
-
-
+import { connectRedis , connectDB  } from './DB/index.js';
 console.log({NODE_ENV});
 async function bootstrap(){
 const app = express()
@@ -20,7 +15,7 @@ app.use(cors())
 
 // DB ....
 await connectDB()
-
+await connectRedis()
 //application routing ......................
 app.get('/' , (req , res , next )=>{
     res.send('Hello')
@@ -29,7 +24,6 @@ app.get('/' , (req , res , next )=>{
 
 app.use('/auth',authRouter)
 app.use('/user', userRouter)
-app.use('/otp', otpRouter)
 
 // invalid routing ....................
 app.use('{/*dummy}' , (req , res , next)=>{

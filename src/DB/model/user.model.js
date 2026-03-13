@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema({
             type:String ,
             default: null
         },
-        confirmEmail:{
+        confirmEmail:{  // OTP
             type:Date
         },
         provider:{
@@ -48,15 +48,6 @@ const userSchema = new mongoose.Schema({
             type:Number , 
             enum : Object.values(RoleEnum),
             default : RoleEnum.User
-        },
-        changeCredentialTime: {
-            type:Date
-        },
-        profilePicture : {
-            type:String
-        },
-        coverProfilePicture : {
-            type:[String]
         },
         changeCredentialTime:{type:Date }  // Logout
 },{

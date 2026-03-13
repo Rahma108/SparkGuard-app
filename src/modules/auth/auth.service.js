@@ -3,12 +3,13 @@
 import { ClientID } from "../../../config/config.service.js"
 import { create, createOne, findOne, UserModel } from "../../DB/index.js"
 import { ProviderEnum } from "../../common/enums/user.enum.js"
+import { get, otpKey, set } from "../../common/services/index.js"
+import { createNumberOtp, emailTemplate, sendEmail } from "../../common/utils/index.js"
 import { ConflictException, NotFoundException} from "../../common/utils/response/index.js"
-import {  generateHash  , encrypt, decrypt, compareHash, createLoginCredentials} from "../../common/utils/security/index.js"
-import { sendOtpFunction } from "../otp/otp.service.js"
+import {  generateHash , compareHash, createLoginCredentials} from "../../common/utils/security/index.js"
 export const signup = async (inputs)=>{
-  // UserName , email , password , confirmPassword  , phone required , gender optional , role optional
-  const {userName , email ,  password , phone , gender , role  } = inputs 
+  // UserName , email , password , confirmPassword  
+  const {userName , email ,  password } = inputs 
   const checkEmailExists = await findOne({
     model:UserModel ,
     select :"email" ,
@@ -23,14 +24,41 @@ export const signup = async (inputs)=>{
   }
   // Store
   const [user] = await create({ model:UserModel 
-    , data : [{userName , email , password: await generateHash(password) , gender , phone : phone ? encrypt(phone) : null
-        , Provider: ProviderEnum.System  , role:role }] })
+    , data : [{userName , email , password: await generateHash(password) , Provider: ProviderEnum.System  }] })
     // Send a verification code to email after registration
-        await sendOtpFunction({ email: user.email });
-   return {userName , email ,  password:user.password , phone , gender}
+      const code = await createNumberOtp()
+        await set({key:  otpKey(email) , value : await generateHash(code.toString())  , ttl:120 })
+        await sendEmail({
+          to : email,
+          subject: "confirmEmail",
+          html:emailTemplate(code , "confirm-Email" )
+
+        })
+  return {userName , email ,  password:user.password }
 }
 
-
+//Confirm Email with otp..
+export const confirmEmail = async(inputs)=>{
+  const {email , otp} = inputs
+    const account = await findOne({
+    model:UserModel ,
+    select :"email" ,
+    filter:{email , confirmEmail: { $eq: null } , Provider:ProviderEnum.System } 
+  })
+  if(!account){
+    throw NotFoundException({message:"Fail to find Match account ❌"})
+  }
+  const hashOtp = await get(otpKey(email))
+  if(!hashOtp){
+    throw NotFoundException({message : "Expired OTP 😊"})
+  }
+  if(!await compareHash(otp , hashOtp )){
+    throw ConflictException({message :"Invalid OTP ❌"})
+  }
+  account.confirmEmail = new Date()
+  await account.save()
+  return ;
+}
 export const login = async(inputs , issuer)=>{
   const {email , password} = inputs 
   const user = await findOne({
@@ -40,8 +68,6 @@ export const login = async(inputs , issuer)=>{
   if(!user){
     throw NotFoundException({message:"Invalid Login Credentials ❌"})
   }
-  //Decrypt Phone
-  if (user.phone) user.phone = decrypt(user.phone);
   //Hash Password
   const match = await compareHash(password , user.password )
   if(!match){
@@ -83,17 +109,14 @@ export const loginWithGmail = async({idToken , issuer})=>{
   return await createLoginCredentials(user, issuer) 
 }
 
-
 export const signupWithGmail = async({idToken , issuer})=>{
   if (!idToken) {
     throw new BadRequestException({ message: "idToken is required" });
 }
 const payload = await verifyGoogleAccount(idToken)
-
 //  1- User Exists in Database  And Provider == System  ==> Throw Error ..
 //  2- User Exists in Database  And Provider == Google  ==> Redirect google Login 
 //  3- User Not Exists ==> Create with Provider Google .
-
   const checkUserExist = await findOne({model:UserModel , email:payload.email })
   if(checkUserExist){
     // 1- User Exists in Database  And Provider == System  ==> Throw Error ..
@@ -126,7 +149,4 @@ const payload = await verifyGoogleAccount(idToken)
 
   const token = await createLoginCredentials(newUser, issuer);
   return { account: token , status: 201 };
-
-  //token
-
 }

@@ -14,7 +14,7 @@ config({path:resolve(`./config/${envPath[NODE_ENV]}`)})
 export const port = process.env.PORT ?? 7000
 
 export const DB_URI = process.env.DB_URI
-
+export const REDIS_URL = process.env.REDIS_URL
 
 export const SALT_ROUND= parseInt(process.env.SALT_ROUND ?? '10') 
 export const IV_LENGTH = parseInt(process.env.IV_LENGTH ?? '16')
@@ -32,7 +32,11 @@ export const REFRESH_EXPIRES_IN= parseInt(process.env.REFRESH_EXPIRES_IN)
 // OTP
 export const GMAIL=process.env.GMAIL
 export const PASSWORD=process.env.PASSWORD
+export const APPLICATION_NAME=process.env.APPLICATION_NAME
 
+export const LINKEDIN_LINK=process.env.LINKEDIN_LINK
+export const GITHUB=process.env.GITHUB
+export const INSTAGRAM_LINK=process.env.INSTAGRAM_LINK
 
 export const ClientID=process.env.ClientID
 

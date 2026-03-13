@@ -2,11 +2,10 @@
 // logic
 
 import { createLoginCredentials} from "../../common/utils/security/token.security.js";
-import { createOne, deleteMany} from "../../DB/index.js";
-import { TokenModel } from '../../DB/model/index.js';
-import { REFRESH_EXPIRES_IN } from '../../../config/config.service.js';
 import { LogoutEnum } from '../../common/enums/security.enum.js';
-import { decrypt } from "../../common/utils/index.js";
+import {baseRevokeTokenKey, deleteKeys, keys, revokeTokenKey, set} from '../../common/services/index.js'
+import { ConflictException, decrypt } from "../../common/utils/index.js";
+import { ACCESS_EXPIRES_IN, REFRESH_EXPIRES_IN } from "../../../config/config.service.js";
 
 export const dashboard = async () => {
     const data = {
@@ -40,46 +39,37 @@ export const updatedProfile= async  (user , data)=>{
     }
 }
 
-export const rotateToken = async  (user, issuer)=>{
+export const createRevokeToken = async( { userId ,jti , ttl  })=>{
+    await set({
+                key: revokeTokenKey({userId, jti}),
+                value : jti ,
+                ttl 
+            })
+    return ;
+}
+export const rotateToken = async  (user , {iat , jti , subject } , issuer)=>{
+    if((iat+ ACCESS_EXPIRES_IN )* 1000 >= Date.now() + (30000)  ){
+        throw ConflictException({message: "Current access token still valid "})
+    }
+    await createRevokeToken({userId:subject , jti , ttl:iat  + REFRESH_EXPIRES_IN })
     return await createLoginCredentials(user , issuer )
 }
 
-
-export const logout = async({flag}, user, decoded) => {
+export const logout = async({flag}, user, {iat , jti ,subject}) => {
     // use consistent userId from decoded token
-    const userId = decoded.sub || decoded.subject;
-
-    if (!userId || !decoded?.jti || !decoded?.iat) {
-        throw new Error("Invalid decoded token: missing sub/subject, jti, or iat");
-    }
-
-    let status = 200;
-
+    let status = 200
     switch (flag) {
         case LogoutEnum.All:
-            // revoke all tokens by updating changeCredentialTime and deleting token entries
-            user.changeCredentialTime = new Date();
-            await user.save();
+            user.changeCredentialTime= new Date(Date.now()) 
+            await user.save()
 
-            await deleteMany({ 
-                model: TokenModel, 
-                filter: { userId: user._id } 
-            });
+            await deleteKeys(await keys(baseRevokeTokenKey(subject)))
             break;
-
+    
         default:
-            // revoke current token
-            await createOne({
-                model: TokenModel,
-                data: {
-                    userId: userId, 
-                    jwtid: decoded.jti,
-                    expiresIn: new Date((decoded.iat + REFRESH_EXPIRES_IN) * 1000)
-                }
-            });
-            status = 201;
+            await createRevokeToken({userId:subject , jti , ttl:iat  + REFRESH_EXPIRES_IN })
+            status=201
             break;
-    }
-
-    return status;
+        }
+    return status
 }

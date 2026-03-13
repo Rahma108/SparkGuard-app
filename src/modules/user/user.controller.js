@@ -23,9 +23,8 @@ router.patch("/updateProfile",authentication(),async (req, res, next) => {
         return successResponse({ res, result })
     }
 )
-router.get('/rotate' , authentication(TokenTypeEnum.refresh), authorization() , async (req , res , next )=>{
-    
-    const result = await rotateToken(req.user , `${req.protocol}://${req.host}`)
+router.get('/rotate' , authentication(TokenTypeEnum.refresh) , async (req , res , next )=>{ 
+    const result = await rotateToken(req.user , req.decoded ,`${req.protocol}://${req.host}`)
     return successResponse({res , result})
 })
 

@@ -1,19 +1,16 @@
-// Start Assignment week ...
-
 import jwt from 'jsonwebtoken'
 import { RoleEnum } from '../../enums/user.enum.js'
 import { ACCESS_EXPIRES_IN, REFRESH_EXPIRES_IN, User_REFRESH_TOKEN_SECURITY_KEY , User_TOKEN_SECURITY_KEY } from '../../../../config/config.service.js'
 import { AudienceEnum, TokenTypeEnum } from '../../enums/security.enum.js'
 import { BadRequestException, UnauthorizedException } from '../response/error.response.js'
 import { findOne } from '../../../DB/database.repository.js'
-import { UserModel , TokenModel } from '../../../DB/index.js'
+import { UserModel } from '../../../DB/index.js'
 import {randomUUID} from 'node:crypto'
+import { get, revokeTokenKey } from '../../services/index.js'
 
-// jwt.sign({payload , signature , options })
 export const generateToken = async ({payload = {} , secretKey = User_TOKEN_SECURITY_KEY , options = {}  })=>{
     return  jwt.sign(payload , secretKey , options )
 }
-
 
 export const verifyToken = async ({token , secretKey = User_TOKEN_SECURITY_KEY  } = {} )=>{
     return  jwt.verify(token ,  secretKey )
@@ -70,7 +67,7 @@ export const decodeToken = async ({token , tokenType = TokenTypeEnum.access  } =
         throw BadRequestException({message : "Fail to decode this token aud is required  "})
         
     }
-    if(await findOne({model:TokenModel ,filter : {jwtid : decoded.jti } })){
+    if(decoded.jti && await get(revokeTokenKey({userId:decoded.subject , jti:decoded.jti }))){
         throw UnauthorizedException({message :"Invalid Login Session ❌"})
     }
 

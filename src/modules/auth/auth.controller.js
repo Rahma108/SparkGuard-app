@@ -1,6 +1,6 @@
 
 import {Router} from 'express'
-import { login, signup } from './auth.service.js'
+import { confirmEmail, login, loginWithGmail, signup, signupWithGmail } from './auth.service.js'
 import { successResponse } from '../../common/utils/response/success.response.js'
 import * as validators from './auth.validation.js'
 import { validation } from '../../common/utils/middleware/validation.middleware.js'
@@ -10,7 +10,11 @@ router.post('/signup', validation(validators.signupSchema) , async(req , res , n
     const result = await signup(req.body)
     return successResponse({res , status:201 , result})
 })
+router.patch('/confirm-email' ,  validation(validators.confirmEmailSchema) , async(req , res , next )=>{
+    const result = await confirmEmail(req.body)
+    return  successResponse({res})
 
+})
 router.post('/login',validation(validators.loginSchema), async(req , res , next )=>{
 
     const result = await login(req.body , `${req.protocol}://${req.host}`)
