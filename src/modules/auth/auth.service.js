@@ -3,10 +3,45 @@
 import { ClientID } from "../../../config/config.service.js"
 import { create, createOne, findOne, UserModel } from "../../DB/index.js"
 import { ProviderEnum } from "../../common/enums/user.enum.js"
-import { get, otpKey, set } from "../../common/services/index.js"
+import { deleteKeys, get, increment, keys, otpBlockKey, otpKey, otpMaxRequestKey, set, ttl} from "../../common/services/index.js"
 import { createNumberOtp, emailTemplate, sendEmail } from "../../common/utils/index.js"
 import { ConflictException, NotFoundException} from "../../common/utils/response/index.js"
 import {  generateHash , compareHash, createLoginCredentials} from "../../common/utils/security/index.js"
+export const generateAndSendConfirmEmailOtp = async(email)=>{
+       //Check Block Conditional .
+      const blockKey= otpBlockKey(email)
+      const remainingBlockTime = await ttl(blockKey)
+      if(remainingBlockTime>0){
+          throw ConflictException({message:`You have reached Max Request Trial Count please try again later after ${remainingBlockTime} sec. `})
+      }
+      //check Max Request Trials 
+      const maxTrialKey = otpMaxRequestKey(email)
+        const checkOtpMaxRequest = Number(await get(maxTrialKey) || 0 )
+        if(checkOtpMaxRequest>=3){
+              await set({
+              key:  blockKey , 
+              value : 0
+            , ttl:300 })
+    
+          throw ConflictException({message:"You have reached Max Request Trial Count please try again later after 300 sec. "})
+
+        }
+
+        const code = await createNumberOtp()
+        await set({
+          key: otpKey(email) , 
+          value : await generateHash( `${code}` )
+        , ttl: 120
+      })
+      checkOtpMaxRequest  > 0 ? await increment(maxTrialKey): await set({key : maxTrialKey , value : 1 , ttl : 300 })
+        await sendEmail({
+          to : email,
+          subject: "confirmEmail",
+          html:emailTemplate(code , "confirm-Email" )
+
+        })
+      return ;
+}
 export const signup = async (inputs)=>{
   // UserName , email , password , confirmPassword  
   const {userName , email ,  password } = inputs 
@@ -26,14 +61,7 @@ export const signup = async (inputs)=>{
   const [user] = await create({ model:UserModel 
     , data : [{userName , email , password: await generateHash(password) , Provider: ProviderEnum.System  }] })
     // Send a verification code to email after registration
-      const code = await createNumberOtp()
-        await set({key:  otpKey(email) , value : await generateHash(code.toString())  , ttl:120 })
-        await sendEmail({
-          to : email,
-          subject: "confirmEmail",
-          html:emailTemplate(code , "confirm-Email" )
-
-        })
+    await generateAndSendConfirmEmailOtp(email)
   return {userName , email ,  password:user.password }
 }
 
@@ -57,6 +85,27 @@ export const confirmEmail = async(inputs)=>{
   }
   account.confirmEmail = new Date()
   await account.save()
+
+  await deleteKeys(await keys(otpKey(email)))
+  return ;
+}
+
+export const reSendConfirmEmail = async(inputs)=>{
+  const {email} = inputs
+    const account = await findOne({
+    model:UserModel ,
+    select :"email" ,
+    filter:{email , confirmEmail: { $eq: null } , Provider:ProviderEnum.System } 
+  })
+  if(!account){
+    throw NotFoundException({message:"Fail to find Match account ❌"})
+  }
+  const remainingTime = await ttl(otpKey(email))
+  if( remainingTime > 0 ){
+    throw ConflictException({message : `Sorry We Can not provide new otp until exists one is expired ypu can try again after ${remainingTime}😊`})
+  }
+    // Re-Send a verification code to email after registration
+  await generateAndSendConfirmEmailOtp(email)
   return ;
 }
 export const login = async(inputs , issuer)=>{
