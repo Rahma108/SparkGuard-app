@@ -1,10 +1,10 @@
 
 // logic--- queries ....
 import { ClientID } from "../../../config/config.service.js"
-import { create, createOne, findOne, UserModel } from "../../DB/index.js"
+import { create, createOne, findOne, findOneAndUpdate, UserModel } from "../../DB/index.js"
 import { EmailEnum } from "../../common/enums/index.js"
 import { ProviderEnum } from "../../common/enums/user.enum.js"
-import { deleteKeys, get, increment, keys, otpBlockKey, otpKey, otpMaxRequestKey, set, ttl} from "../../common/services/index.js"
+import { baseRevokeTokenKey, deleteKeys, get, increment, keys, otpBlockKey, otpKey, otpMaxRequestKey, set, ttl} from "../../common/services/index.js"
 import { createNumberOtp, emailEmitter, emailTemplate, sendEmail} from "../../common/utils/index.js"
 import { ConflictException, NotFoundException} from "../../common/utils/response/index.js"
 import {  generateHash , compareHash, createLoginCredentials} from "../../common/utils/security/index.js"
@@ -133,6 +133,37 @@ export const requestForgotPasswordCode = async({email})=>{
   return ;
 }
 
+export const verifyForgotPasswordCode = async({email , otp })=>{
+  const hashOtp = await get(otpKey({email , type:EmailEnum.ForgotPassword }))
+  if(!hashOtp){
+    throw NotFoundException({message : "Expired OTP ❌"})
+  }
+  if(!await compareHash(otp , hashOtp )){
+      throw ConflictException({message:"Invalid OTP 😊"})
+  }
+  return ;
+}
+
+export const resendForgotPasswordCode= async({email , otp , password })=>{
+    await verifyForgotPasswordCode({email ,otp })
+    const account = await findOneAndUpdate({
+      model:UserModel ,
+      filter :{email , confirmEmail:{ $ne: null } , Provider:ProviderEnum.System } ,
+      update:{
+        password:await generateHash(password),
+        changeCredentialTime:new Date() // All Logout
+      }
+
+    })
+    if(!account){
+      throw NotFoundException({message:"Fail to find Match account ❌"})
+    }
+    Promise.allSettled([
+          deleteKeys(await keys((otpKey({email , type:EmailEnum.ForgotPassword })))),
+          deleteKeys(await keys(baseRevokeTokenKey(account._id.toString())))
+    ])
+  return ;
+}
 export const login = async(inputs , issuer)=>{
   const {email , password} = inputs 
   const user = await findOne({

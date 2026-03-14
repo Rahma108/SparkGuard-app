@@ -1,6 +1,6 @@
 
 import {Router} from 'express'
-import { confirmEmail, login, loginWithGmail, requestForgotPasswordCode, reSendConfirmEmail, signup, signupWithGmail } from './auth.service.js'
+import { confirmEmail, login, loginWithGmail, requestForgotPasswordCode, reSendConfirmEmail, resendForgotPasswordCode, signup, signupWithGmail, verifyForgotPasswordCode } from './auth.service.js'
 import { successResponse } from '../../common/utils/response/success.response.js'
 import * as validators from './auth.validation.js'
 import { validation } from '../../common/utils/middleware/validation.middleware.js'
@@ -27,6 +27,18 @@ router.post('/request-forgot-password-code' ,  validation(validators.verifyEmail
     return  successResponse({res , status:201})
 
 })
+router.patch('/verify-forgot-password-code' ,  validation(validators.verifyForgotPasswordSchema) , async(req , res , next )=>{
+    await verifyForgotPasswordCode(req.body)
+    return  successResponse({res , status:200})
+
+})
+
+router.patch('/resend-forgot-password-code' ,  validation(validators.resetForgotPasswordSchema) , async(req , res , next )=>{
+    await resendForgotPasswordCode(req.body)
+    return  successResponse({res , status:200})
+})
+
+
 router.post('/login',validation(validators.loginSchema), async(req , res , next )=>{
 
     const result = await login(req.body , `${req.protocol}://${req.host}`)

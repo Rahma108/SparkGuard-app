@@ -4,9 +4,28 @@
 import { createLoginCredentials} from "../../common/utils/security/token.security.js";
 import { LogoutEnum } from '../../common/enums/security.enum.js';
 import {baseRevokeTokenKey, deleteKeys, keys, revokeTokenKey, set} from '../../common/services/index.js'
-import { ConflictException, decrypt } from "../../common/utils/index.js";
+import { compareHash, ConflictException, decrypt, generateHash } from "../../common/utils/index.js";
 import { ACCESS_EXPIRES_IN, REFRESH_EXPIRES_IN } from "../../../config/config.service.js";
 
+
+
+export const updatePassword= async  ({oldPassword , password} , user , issuer )=>{
+    if (!await compareHash(oldPassword , user.password )) {
+        throw ConflictException({message:"Invalid Old Password ❌"})
+    }
+    for (const hash of user.oldPasswords || [] ) {
+        if (await compareHash(password , hash )) {
+        throw ConflictException({message:"Sorry This Password Is Weak you have already used it before ‼️"})
+    }
+    }
+    user.oldPasswords.push(user.password)
+    user.password = await generateHash(password)
+    user.changeCredentialTime = new Date() // Logout ..
+    await user.save()
+    await deleteKeys(await keys(baseRevokeTokenKey(user._id)))
+
+    return await createLoginCredentials(user , issuer)
+}
 export const dashboard = async () => {
     const data = {
         totalScans: 0,

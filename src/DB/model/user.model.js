@@ -49,6 +49,7 @@ const userSchema = new mongoose.Schema({
             enum : Object.values(RoleEnum),
             default : RoleEnum.User
         },
+        oldPasswords:[String],
         changeCredentialTime:{type:Date }  // Logout
 },{
     collection:"users" ,
