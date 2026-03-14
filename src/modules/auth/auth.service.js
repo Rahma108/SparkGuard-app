@@ -15,6 +15,12 @@ export const verifyEmailOtp = async({ email , subject=EmailEnum.ConfirmEmail , t
       if(remainingBlockTime>0){
           throw ConflictException({message:`You have reached Max Request Trial Count please try again later after ${remainingBlockTime} sec. `})
       }
+
+      const oldCodeTTL = await ttl(otpKey({email , type:subject}))
+      if(oldCodeTTL > 0 ){
+          throw ConflictException({message:`Sorry we can not send new otp until first one get expired please try again after ${oldCodeTTL} `})
+
+      }
       //check Max Request Trials 
       const maxTrialKey = otpMaxRequestKey({email , type:subject })
         const checkOtpMaxRequest = Number(await get(maxTrialKey) || 0 )
@@ -29,19 +35,18 @@ export const verifyEmailOtp = async({ email , subject=EmailEnum.ConfirmEmail , t
         }
       const code = await createNumberOtp()
         await set({
-          key: otpKey({email}) , 
+          key: otpKey({email , type:subject }) , 
           value : await generateHash(code.toString())
         , ttl: 120
       })
-      checkOtpMaxRequest  > 0 ? await increment(maxTrialKey): await set({key : maxTrialKey , value : 1 , ttl : 300 })
         await sendEmail({
             to:email ,
             subject,
             html:emailTemplate({code , title })
         })
+      checkOtpMaxRequest  > 0 ? await increment(maxTrialKey): await set({key : maxTrialKey , value : 1 , ttl : 300 })
       return ;
 }
-
 
 export const signup = async (inputs)=>{
   // UserName , email , password , confirmPassword  
@@ -62,7 +67,7 @@ export const signup = async (inputs)=>{
   const [user] = await create({ model:UserModel 
     , data : [{userName , email , password: await generateHash(password) , Provider: ProviderEnum.System  }] })
     // Send a verification code to email after registration
-      emailEmitter.emit(EmailEnum.ConfirmEmail ,async ()=>{
+      emailEmitter.emit("sendEmail" ,async ()=>{
           await verifyEmailOtp({email })
       })
   return {userName , email ,  password:user.password }
@@ -103,14 +108,31 @@ export const reSendConfirmEmail = async(inputs)=>{
   if(!account){
     throw NotFoundException({message:"Fail to find Match account ❌"})
   }
-  const remainingTime = await ttl(otpKey({email}))
-  if( remainingTime > 0 ){
-    throw ConflictException({message : `Sorry We Can not provide new otp until exists one is expired ypu can try again after ${remainingTime}😊`})
-  }
     // Re-Send a verification code to email after registration
   await verifyEmailOtp({email})
   return ;
 }
+
+// Forget Password ...
+// 1- Request Code ..
+// 2- Verify Code ...
+// 3- Update Code ..
+
+export const requestForgotPasswordCode = async({email})=>{
+    const account = await findOne({
+    model:UserModel ,
+    select :"email" ,
+    filter:{email , confirmEmail:{ $ne: null } , Provider:ProviderEnum.System } 
+  })
+  if(!account){
+    throw NotFoundException({message:"Fail to find Match account ❌"})
+  }
+  emailEmitter.emit("sendEmail" ,async ()=>{
+          await verifyEmailOtp({email , subject:EmailEnum.ForgotPassword })
+      })
+  return ;
+}
+
 export const login = async(inputs , issuer)=>{
   const {email , password} = inputs 
   const user = await findOne({
