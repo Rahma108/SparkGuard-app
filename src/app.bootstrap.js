@@ -14,8 +14,8 @@ app.use(express.json());
 app.use(cors())
 
 // DB ....
-await connectDB()
-await connectRedis()
+// await connectDB()
+// await connectRedis()
 //application routing ......................
 app.get('/' , (req , res , next )=>{
     res.send('Hello')
