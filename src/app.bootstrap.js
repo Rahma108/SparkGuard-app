@@ -1,7 +1,7 @@
 
 import express from 'express'
 import { authRouter , userRouter  } from './modules/index.js'
-import { NODE_ENV, port } from '../config/config.service.js'
+import { NODE_ENV } from '../config/config.service.js'
 import { GlobalError } from './common/utils/response/error.response.js';
 import cors from 'cors'
 import { connectRedis , connectDB  } from './DB/index.js';
@@ -31,11 +31,6 @@ app.use('{/*dummy}' , (req , res , next)=>{
 })
 // Handle Error ....................
 app.use(GlobalError)
-// if (process.env.NODE_ENV !== 'production') {
-//         app.listen(port, () => {
-//             console.log(`Listening on port ${port} 🚀🚀🚀🚀`);
-//         });
-//     }
       // routes
     app.get("/", (req, res) => {
         res.send("API is working 🚀");
