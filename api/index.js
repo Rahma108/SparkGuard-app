@@ -1,5 +1,10 @@
-import app from "../src/app.bootstrap.js";
+import bootstrap from "../src/app.bootstrap.js";
 
-export default function handler(req, res) {
+let app;
+
+export default async function handler(req, res) {
+  if (!app) {
+    app = await bootstrap();
+  }
   return app(req, res);
 }
