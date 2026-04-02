@@ -31,11 +31,16 @@ app.use('{/*dummy}' , (req , res , next)=>{
 })
 // Handle Error ....................
 app.use(GlobalError)
-if (process.env.NODE_ENV !== 'production') {
-        app.listen(port, () => {
-            console.log(`Listening on port ${port} 🚀🚀🚀🚀`);
-        });
-    }
+// if (process.env.NODE_ENV !== 'production') {
+//         app.listen(port, () => {
+//             console.log(`Listening on port ${port} 🚀🚀🚀🚀`);
+//         });
+//     }
+      // routes
+    app.get("/", (req, res) => {
+        res.send("API is working 🚀");
+    });
+
     return app;
 }
 export default bootstrap
