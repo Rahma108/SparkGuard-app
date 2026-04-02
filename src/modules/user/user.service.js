@@ -23,9 +23,9 @@ export const updatePassword= async  ({oldPassword , password} , user , issuer )=
     user.changeCredentialTime = new Date() // Logout ..
     await user.save()
     await deleteKeys(await keys(baseRevokeTokenKey(user._id)))
-
     return await createLoginCredentials(user , issuer)
 }
+
 export const dashboard = async () => {
     const data = {
         totalScans: 0,

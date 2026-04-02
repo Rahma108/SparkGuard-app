@@ -31,9 +31,11 @@ app.use('{/*dummy}' , (req , res , next)=>{
 })
 // Handle Error ....................
 app.use(GlobalError)
-app.listen(port , ()=>{
-    console.log(`Listening on port ${port} 🚀🚀🚀🚀`);
-    
-})
+if (process.env.NODE_ENV !== 'production') {
+        app.listen(port, () => {
+            console.log(`Listening on port ${port} 🚀🚀🚀🚀`);
+        });
+    }
+    return app;
 }
 export default bootstrap
