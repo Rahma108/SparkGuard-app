@@ -4,3 +4,5 @@ node_modules/
 .history/
 .postman/
 .postman/globals
+config/.env.dev
+config/.env.prod
