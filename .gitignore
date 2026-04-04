@@ -6,3 +6,4 @@ node_modules/
 .postman/globals
 config/.env.dev
 config/.env.prod
+config/.env.*
