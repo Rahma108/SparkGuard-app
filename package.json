@@ -4,6 +4,7 @@
   "main": "./src/main.js",
   "type": "module",
   "scripts": {
+    "start": "npm run start-prod",
     "start-dev": "cross-env NODE_ENV=development node --watch-path=. ./src/main.js",
     "start-prod": "cross-env NODE_ENV=production node  ./src/main.js"
   },
