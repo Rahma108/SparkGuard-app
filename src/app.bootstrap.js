@@ -5,13 +5,16 @@ import { NODE_ENV, port } from '../config/config.service.js'
 import { GlobalError } from './common/utils/response/error.response.js';
 import cors from 'cors'
 import { connectRedis , connectDB  } from './DB/index.js';
+import helmet from 'helmet';
+import { Limiter } from './common/utils/middleware/limiter.js';
 console.log({NODE_ENV});
 async function bootstrap(){
 const app = express()
 
 // convert buffer data .....................
+app.set("trust proxy", true)
 app.use(express.json());
-app.use(cors())
+app.use(cors() , Limiter , helmet() )
 
 // DB ....
 await connectDB()
