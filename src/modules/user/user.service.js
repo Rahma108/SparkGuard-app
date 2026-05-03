@@ -45,6 +45,7 @@ export const profile= async  (user)=>{
     email: user.email}
 }
 
+
 export const updatedProfile= async  (user , data)=>{
     const { userName } =data
     if (!userName) {

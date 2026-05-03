@@ -49,6 +49,10 @@ const userSchema = new mongoose.Schema({
             enum : Object.values(RoleEnum),
             default : RoleEnum.User
         },
+        isDeleted: {
+            type: Boolean,
+            default: false
+            },
         oldPasswords:[String],
         changeCredentialTime:{type:Date }  // Logout
 },{

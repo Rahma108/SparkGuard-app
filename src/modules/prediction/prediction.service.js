@@ -1,6 +1,7 @@
 import { BadRequestException } from "../../common/utils/index.js";
 
 import axios from "axios";
+import { PredictionModel } from "../../DB/model/prediction.model.js";
 
 // export const checkReadingsService = async (readings) => {
 //     try {
@@ -12,7 +13,16 @@ import axios from "axios";
 //         { timeout: 5000 }
 //         );
 
-//         return response.data;
+//             const data = response.data;
+
+//                 save in DB
+//                 await PredictionModel.create({
+//                     result: data.result,
+//                     confidence: data.confidence,
+//                     variation: data.variation
+//                 });
+
+//                 return data;
 
 //     } catch (error) {
 //         throw BadRequestException({
@@ -20,18 +30,42 @@ import axios from "axios";
 //         });
 //     }
 // };
+
+
 // Test 
 export const checkReadingsService = async (readings) => {
-    try{
-            console.log("INPUT:", readings);
+    try {
+        console.log("INPUT:", readings);
 
-    return {
-        result: "test ok",
-        confidence: 1,
-        variation: 0
-    };
+        // mock logic (test only)
+        const result = "normal";
+        const confidence = 1;
+        const variation = 0;
+
+        // convert result → number
+        const prediction = result === "not normal" ? 1 : 0;
+
+        // save in DB
+        await PredictionModel.create({
+            result,
+            prediction,
+            confidence,
+            variation
+        });
+
+        // return response
+        return {
+            result,
+            prediction,
+            confidence,
+            variation
+        };
 
     } catch (error) {
-        throw BadRequestException({message : "Failed to connect to AI model ❌"})
+        console.log(error);
+        throw BadRequestException({
+            message: "Failed to connect to AI model ❌"
+        });
     }
 };
+

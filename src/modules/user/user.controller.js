@@ -8,10 +8,9 @@ import * as validators from './user.validation.js'
 import { endPoint } from './user.authorization.js'
 const router = Router() // app
 
-
-
 router.patch('/password' ,
     authentication() ,
+    authorization(endPoint.user),
     validation(validators.updatePasswordSchema)
     , async(req , res , next )=>{
     const credentials = await updatePassword(req.body , req.user ,`${req.protocol}://${req.host}` )
@@ -34,12 +33,12 @@ router.patch("/updateProfile",authentication(),async (req, res, next) => {
         return successResponse({ res, result })
     }
 )
-router.get('/rotate' , authentication(TokenTypeEnum.refresh) , async (req , res , next )=>{ 
+router.get('/rotate' , authentication(TokenTypeEnum.refresh) ,  async (req , res , next )=>{ 
     const result = await rotateToken(req.user , req.decoded ,`${req.protocol}://${req.host}`)
     return successResponse({res , result})
 })
 
-router.post('/logout', authentication() ,  async(req , res , next)=>{
+router.post('/logout', authentication() , authorization(endPoint.profile),  async(req , res , next)=>{
     const status = await logout(req.body, req.user, req.decoded )
     return successResponse({res  , status:status  })
 })

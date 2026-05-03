@@ -5,7 +5,7 @@ export const GenderEnum = {
 }
 export const RoleEnum = {
     User: 0 ,
-    admin : 1
+    Admin : 1
 }
 export const ProviderEnum = {
     System :0 ,
