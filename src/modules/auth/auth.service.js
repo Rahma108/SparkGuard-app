@@ -144,6 +144,7 @@ export const verifyForgotPasswordCode = async({email , otp })=>{
   return ;
 }
 
+
 export const resendForgotPasswordCode= async({email , otp , password })=>{
     await verifyForgotPasswordCode({email ,otp })
     const account = await findOneAndUpdate({
@@ -164,6 +165,7 @@ export const resendForgotPasswordCode= async({email , otp , password })=>{
     ])
   return ;
 }
+
 export const login = async(inputs , issuer)=>{
   const {email , password} = inputs 
   const user = await findOne({

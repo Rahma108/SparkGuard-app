@@ -1,0 +1,1 @@
+export {default as predictionRouter} from './prediction.controller.js'

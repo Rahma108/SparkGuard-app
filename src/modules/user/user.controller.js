@@ -5,6 +5,7 @@ import { successResponse } from '../../common/utils/response/success.response.js
 import {authentication , authorization, validation} from '../../common/utils/middleware/index.js'
 import { TokenTypeEnum } from '../../common/enums/security.enum.js'
 import * as validators from './user.validation.js'
+import { endPoint } from './user.authorization.js'
 const router = Router() // app
 
 
@@ -23,7 +24,7 @@ router.get("/dashboard",authentication(),async (req, res, next) => {
 }
 )
 //Profile
-router.get('/' , authentication() , authorization(), async (req , res , next )=>{
+router.get('/' , authentication() , authorization(endPoint.profile) , async (req , res , next )=>{
     const result = await profile(req.user)
     return successResponse({res , result})
 })

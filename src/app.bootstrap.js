@@ -1,6 +1,6 @@
 
 import express from 'express'
-import { authRouter , userRouter  } from './modules/index.js'
+import { adminRouter, authRouter , predictionRouter, userRouter  } from './modules/index.js'
 import { NODE_ENV, port } from '../config/config.service.js'
 import { GlobalError } from './common/utils/response/error.response.js';
 import cors from 'cors'
@@ -27,7 +27,11 @@ app.get('/' , (req , res , next )=>{
 
 app.use('/auth',authRouter)
 app.use('/user', userRouter)
+app.use('/predict', predictionRouter)
+app.use('/admin' ,adminRouter
 
+
+)
 // invalid routing ....................
 app.use('{/*dummy}' , (req , res , next)=>{
         return res.status(404).json({message : "invalid routing "})

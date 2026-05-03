@@ -16,6 +16,7 @@ export const GlobalError =(error ,  req , res , next )=>{
 export const ErrorException = ({message='Fail' , cause=undefined } = {} )=>{
     throw new Error( message , {cause} )
 }
+
 export const BadRequestException = ({ message='BadRequestException' , extra = undefined }  = {} )=>{
     return ErrorException({message , cause:{status:400 ,   extra} })
 }
@@ -29,5 +30,5 @@ export const NotFoundException = ({ message='NotFoundException' , extra ={undefi
     return ErrorException({message , cause:{status:404  , extra  }})
 }
 export const ConflictException = ({message='ConflictException' , extra = undefined} = {} )=>{
-    throw ErrorException({message , cause:{status:409  , extra} })
+    throw ErrorException({message , cause:{ status:409  , extra} })
 }
