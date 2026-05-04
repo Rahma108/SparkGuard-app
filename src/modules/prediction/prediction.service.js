@@ -10,28 +10,31 @@ export const checkReadingsService = async (readings) => {
         const response = await axios.post(
         "http://13.50.124.36:8000/predict",
         { readings },
-        { timeout: 5000 }
+        { timeout: 60000 }
         );
 
             const data = response.data;
+            console.log("FAST API RESPONSE:", data);
 
                 //save in DB
                 await PredictionModel.create({
-                    result: data.result,
+                    prediction: data.result,
                     confidence: data.confidence,
                     variation: data.variation
                 });
 
                 return data;
 
-    } catch (error) {
-        throw BadRequestException({
+    }  catch (error) {
+    console.log("AI ERROR:", error.message);
+    console.log("DETAIL:", error.response?.data || error.code);
+
+    throw BadRequestException({
         message: "Failed to connect to AI model ❌"
-        });
-    }
-};
+    });
+}
 
-
+}
 // Test 
 // export const checkReadingsService = async (readings) => {
 //     try {
