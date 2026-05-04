@@ -15,7 +15,7 @@ export const checkReadingsService = async (readings) => {
 
             const data = response.data;
 
-                save in DB
+                //save in DB
                 await PredictionModel.create({
                     result: data.result,
                     confidence: data.confidence,
