@@ -1,3 +1,4 @@
+import { RoleEnum } from "../../common/enums/user.enum.js";
 import { NotFoundException } from "../../common/utils/index.js";
 import { UserModel } from "../../DB/index.js";
 import { PredictionModel } from "../../DB/model/prediction.model.js";
@@ -35,7 +36,7 @@ export const getPredictionsService = async () => {
 
 // Get All Users In DB...
 export const getAllUsersService = async () => {
-    const users = await UserModel.find({ isDeleted: false })
+    const users = await UserModel.find({ isDeleted: false , role: { $ne: RoleEnum.Admin } })
         .select("email role _id");
 
     return users.map(user => ({
