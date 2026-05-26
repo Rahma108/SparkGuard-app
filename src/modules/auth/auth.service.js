@@ -77,48 +77,6 @@ export const signup = async (inputs) => {
   };
 };
 
-
-// export const approveUser = async (userId) => {
-
-//   const user = await findOne({
-//     model: UserModel,
-//     filter: { _id: userId }
-//   });
-
-//   if (!user) {
-//     throw NotFoundException({ message: "User not found ❌" });
-//   }
-
-//   //  update status
-//   user.status = AdminApproachEnum.APPROVED;
-//   await user.save();
-
-//   //  generate activation token
-//   const token = await generateToken({
-//     payload: {
-//       email: user.email,
-//       type: AdminApproachEnum.ACTIVE
-//     },
-//     secretKey: Admin_TOKEN_SECURITY_KEY,
-//     options: {
-//       expiresIn: "1h"
-//     }
-//   });
-
-//   const link = `${BASE_URL}/auth/activate?token=${token}`;
-
-//   // ✉️ send email
-//   emailEmitter.emit("sendEmail", async () => {
-//     await sendApprovalEmail({
-//       email: user.email,
-//       name: user.userName,
-//       link
-//     });
-//   });
-
-//   return { message: "User approved and email sent 🚀" };
-// };
-
 export const approveUser = async (userId) => {
 
   const user = await findOne({
@@ -189,59 +147,6 @@ export const activateAccount = async (token) => {
   return { message: "Account activated successfully ✔️" };
 };
 
-
-// export const activateAccount = async (token) => {
-
-//   const decoded = await verifyToken({ token , secretKey:  Admin_TOKEN_SECURITY_KEY });
-
-//   if (decoded.type !== AdminApproachEnum.ACTIVE) {
-//     throw BadRequestException({ message: "Invalid token ❌" });
-//   }
-
-//      // 1. validate token type
-//     if (decoded.type !== AdminApproachEnum.ACTIVE ) {
-//         throw BadRequestException({ message: "Invalid token ❌" });
-//     }
-
-//     // 2. find user by ID (NOT email)
-//     const user = await findOne({
-//         model: UserModel,
-//         filter: { _id: decoded.userId }
-//     });
-
-//   if (!user) {
-//     throw NotFoundException({ message: "User not found ❌" });
-//   }
-
-//   user.status = AdminApproachEnum.ACTIVE
-//   await user.save();
-
-//   return { message: "Account activated successfully ✔️" };
-// };
-//Confirm Email with otp..
-// export const confirmEmail = async(inputs)=>{
-//   const {email , otp} = inputs
-//     const account = await findOne({
-//     model:UserModel ,
-//     select :"email" ,
-//     filter:{email , confirmEmail: { $eq: null } , Provider:ProviderEnum.System } 
-//   })
-//   if(!account){
-//     throw NotFoundException({message:"Fail to find Match account ❌"})
-//   }
-//   const hashOtp = await get(otpKey({email}))
-//   if(!hashOtp){
-//     throw NotFoundException({message : "Expired OTP 😊"})
-//   }
-//   if(!await compareHash(otp , hashOtp )){
-//     throw ConflictException({message :"Invalid OTP ❌"})
-//   }
-//   account.confirmEmail = new Date()
-//   await account.save()
-
-//   await deleteKeys(await keys(otpKey({email })))
-//   return ;
-// }
 
 export const login = async (inputs, issuer) => {
   const { email, password } = inputs;

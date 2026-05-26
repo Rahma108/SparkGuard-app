@@ -78,3 +78,19 @@ export const restoreUserService = async (userId) => {
         message: "User restored successfully"
     };
 };
+
+
+
+// Get all Users Deleted ... btn deleted
+// getAllDeletedUsers
+export const getAllDeletedUsers= async () => {
+    const users = await UserModel.find({ isDeleted: true , role: { $ne: RoleEnum.Admin } })
+        .select("email role _id");
+
+    return users.map(user => ({
+        id: user._id,
+        email: user.email,
+        role: user.role
+    }));
+};
+

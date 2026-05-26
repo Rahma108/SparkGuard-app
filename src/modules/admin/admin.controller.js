@@ -1,6 +1,6 @@
 import {Router} from 'express'
 import { authentication, authorization, successResponse } from '../../common/utils/index.js';
-import { getAllUsersService, getPredictionsService, getStatsService, restoreUserService, softDeleteUserService } from './admin.service.js';
+import { getAllDeletedUsers, getAllUsersService, getPredictionsService, getStatsService, restoreUserService, softDeleteUserService } from './admin.service.js';
 import { endPoint } from '../user/user.authorization.js';
 import { approveUser } from '../auth/auth.service.js';
 
@@ -101,6 +101,23 @@ router.patch(
 
         return successResponse({ res, result });
 
+        } catch (error) {
+        next(error);
+        }
+    }
+);
+
+
+// Get all Users Deleted ... btn deleted
+
+router.get(
+    "/deletedUsers",
+    authentication(),
+    authorization(endPoint.adminStats),
+    async (req, res, next) => {
+        try {
+        const result = await getAllDeletedUsers();
+        return successResponse({ res, result });
         } catch (error) {
         next(error);
         }
