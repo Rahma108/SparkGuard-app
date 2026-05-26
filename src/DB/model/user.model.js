@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { GenderEnum, ProviderEnum, RoleEnum } from "../../common/enums/user.enum.js";
+import { AdminApproachEnum } from "../../common/enums/email.enum.js";
 
 const userSchema = new mongoose.Schema({
     firstName : {
@@ -36,8 +37,15 @@ const userSchema = new mongoose.Schema({
             type:String ,
             default: null
         },
-        confirmEmail:{  // OTP
-            type:Date
+        status: {
+            type: String,
+            enum: Object.values(AdminApproachEnum),
+            default: AdminApproachEnum.PENDING
+        },
+
+        confirmEmail: {
+            type: Date,
+            default: null
         },
         provider:{
             type:Number , 

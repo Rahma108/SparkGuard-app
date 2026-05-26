@@ -22,9 +22,14 @@ export const SECURITY_KEY = process.env.SECURITY_KEY
 
 export const System_TOKEN_SECURITY_KEY = process.env.System_TOKEN_SECURITY_KEY
 export const User_TOKEN_SECURITY_KEY= process.env.User_TOKEN_SECURITY_KEY
+export const Admin_TOKEN_SECURITY_KEY= process.env.Admin_TOKEN_SECURITY_KEY
+
+export const ACTIVATION_SECRET= process.env.ACTIVATION_SECRET
 
 export const System_REFRESH_TOKEN_SECURITY_KEY = process.env.System_REFRESH_TOKEN_SECURITY_KEY
 export const User_REFRESH_TOKEN_SECURITY_KEY= process.env.User_REFRESH_TOKEN_SECURITY_KEY
+export const Admin_REFRESH_TOKEN_SECURITY_KEY= process.env.Admin_REFRESH_TOKEN_SECURITY_KEY
+
 
 export const ACCESS_EXPIRES_IN= parseInt(process.env.ACCESS_EXPIRES_IN)
 export const REFRESH_EXPIRES_IN= parseInt(process.env.REFRESH_EXPIRES_IN)
@@ -38,5 +43,5 @@ export const LINKEDIN_LINK=process.env.LINKEDIN_LINK
 export const GITHUB=process.env.GITHUB
 export const INSTAGRAM_LINK=process.env.INSTAGRAM_LINK
 
-export const ClientID=process.env.ClientID
+export const BASE_URL =process.env.BASE_URL
 

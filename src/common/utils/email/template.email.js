@@ -86,3 +86,53 @@ export const emailTemplate = ({code , title} = {})=>{
                 </body>
                 </html>`
 }
+
+export const approvalTemplate = ({ name, link }) => {
+  return `
+  <div style="font-family: Arial; background:#0f172a; padding:30px;">
+
+    <div style="max-width:600px;margin:auto;background:#111827;border-radius:14px;overflow:hidden;
+                box-shadow:0 10px 40px rgba(0,0,0,0.5); border:1px solid #1f2937">
+
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#f59e0b,#f97316);
+                  padding:25px;text-align:center;color:#000;">
+        <h2 style="margin:0;font-size:22px;">⚡ Electricity System</h2>
+        <p style="margin:5px 0 0;font-size:13px;">Account Activation Portal</p>
+      </div>
+
+      <!-- Body -->
+      <div style="padding:30px;text-align:center;color:#e5e7eb;">
+
+        <h3 style="margin-bottom:10px;">Hello ${name || "Engineer"} 👷‍♂️</h3>
+
+        <p style="font-size:14px;line-height:1.7;color:#cbd5e1;">
+          Your account has been <b style="color:#f59e0b;">approved by the system administrator</b>.
+          You can now activate your access to the Electricity Management Platform.
+        </p>
+
+        <!-- Button -->
+        <a href="${link}"
+           style="display:inline-block;margin-top:25px;padding:14px 28px;
+           background:linear-gradient(135deg,#f59e0b,#f97316);
+           color:#000;text-decoration:none;
+           border-radius:8px;font-weight:bold;font-size:14px;">
+          ⚡ Activate Account
+        </a>
+
+        <p style="margin-top:20px;font-size:12px;color:#94a3b8;">
+          This activation link is valid for <b>1 hour</b> for security reasons.
+        </p>
+
+      </div>
+
+      <!-- Footer -->
+      <div style="background:#0b1220;text-align:center;padding:15px;font-size:11px;color:#64748b;">
+        Electricity Management System • Secure Access Portal
+      </div>
+
+    </div>
+
+  </div>
+  `;
+};

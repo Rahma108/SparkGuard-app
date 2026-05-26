@@ -1,13 +1,14 @@
 
 // logic--- queries ....
-import { ClientID } from "../../../config/config.service.js"
+import { ACTIVATION_SECRET, Admin_TOKEN_SECURITY_KEY, BASE_URL } from "../../../config/config.service.js"
 import { create, createOne, findOne, findOneAndUpdate, UserModel } from "../../DB/index.js"
-import { EmailEnum } from "../../common/enums/index.js"
-import { ProviderEnum } from "../../common/enums/user.enum.js"
+import { AdminApproachEnum, EmailEnum } from "../../common/enums/index.js"
+import { ProviderEnum, RoleEnum } from "../../common/enums/user.enum.js"
 import { baseRevokeTokenKey, deleteKeys, get, increment, keys, otpBlockKey, otpKey, otpMaxRequestKey, set, ttl} from "../../common/services/index.js"
+import { sendApprovalEmail } from "../../common/utils/email/adminApproval.email.js"
 import { createNumberOtp, emailEmitter, emailTemplate, sendEmail} from "../../common/utils/index.js"
-import { ConflictException, NotFoundException} from "../../common/utils/response/index.js"
-import {  generateHash , compareHash, createLoginCredentials} from "../../common/utils/security/index.js"
+import { BadRequestException, ConflictException, NotFoundException, UnauthorizedException} from "../../common/utils/response/index.js"
+import {  generateHash , compareHash, createLoginCredentials, verifyToken, generateToken} from "../../common/utils/security/index.js"
 export const verifyEmailOtp = async({ email , subject=EmailEnum.ConfirmEmail , title = "Verify Account" }={} )=>{
        //Check Block Conditional .
       const blockKey= otpBlockKey({email , type:subject })
@@ -48,70 +49,268 @@ export const verifyEmailOtp = async({ email , subject=EmailEnum.ConfirmEmail , t
       return ;
 }
 
-export const signup = async (inputs)=>{
-  // UserName , email , password , confirmPassword  
-  const {userName , email ,  password } = inputs 
-  const checkEmailExists = await findOne({
-    model:UserModel ,
-    select :"email" ,
-    filter:{email} ,
-    options:{
-      lean:true 
+export const signup = async (inputs) => {
+  const { userName, email, password } = inputs;
+
+  const exists = await findOne({
+    model: UserModel,
+    filter: { email }
+  });
+
+  if (exists) {
+    throw ConflictException({ message: "Email already exists ‼️" });
+  }
+
+  const [user] = await create({
+    model: UserModel,
+    data: [{
+      userName,
+      email,
+      password: await generateHash(password),
+      Provider: ProviderEnum.System,
+      status: AdminApproachEnum.PENDING
+    }]
+  });
+
+  return {
+    message: "Signup successful, waiting for admin approval ⏳"
+  };
+};
+
+
+// export const approveUser = async (userId) => {
+
+//   const user = await findOne({
+//     model: UserModel,
+//     filter: { _id: userId }
+//   });
+
+//   if (!user) {
+//     throw NotFoundException({ message: "User not found ❌" });
+//   }
+
+//   //  update status
+//   user.status = AdminApproachEnum.APPROVED;
+//   await user.save();
+
+//   //  generate activation token
+//   const token = await generateToken({
+//     payload: {
+//       email: user.email,
+//       type: AdminApproachEnum.ACTIVE
+//     },
+//     secretKey: Admin_TOKEN_SECURITY_KEY,
+//     options: {
+//       expiresIn: "1h"
+//     }
+//   });
+
+//   const link = `${BASE_URL}/auth/activate?token=${token}`;
+
+//   // ✉️ send email
+//   emailEmitter.emit("sendEmail", async () => {
+//     await sendApprovalEmail({
+//       email: user.email,
+//       name: user.userName,
+//       link
+//     });
+//   });
+
+//   return { message: "User approved and email sent 🚀" };
+// };
+
+export const approveUser = async (userId) => {
+
+  const user = await findOne({
+    model: UserModel,
+    filter: { _id: userId }
+  });
+
+  if (!user) {
+    throw NotFoundException({ message: "User not found ❌" });
+  }
+
+  //  ممنوع admin يتأثر
+  if (user.role === RoleEnum.Admin) {
+    throw BadRequestException({ message: "Admins cannot be activated ❌" });
+  }
+
+  user.status = AdminApproachEnum.APPROVED;
+  await user.save();
+
+  const token = await generateToken({
+    payload: {
+      userId: user._id.toString(),
+      type: "ACTIVATION"
+    },
+    secretKey: ACTIVATION_SECRET,
+    options: { expiresIn: "1h" }
+  });
+
+  const link = `${BASE_URL}/auth/activate?token=${token}`;
+
+  emailEmitter.emit("sendEmail", async () => {
+    await sendApprovalEmail({
+      email: user.email,
+      name: user.userName,
+      link
+    });
+  });
+
+  return { message: "User approved successfully 🚀" };
+};
+export const activateAccount = async (token) => {
+
+  const decoded = await verifyToken({
+    token,
+    secretKey: ACTIVATION_SECRET
+  });
+
+  if (decoded.type !== "ACTIVATION") {
+    throw BadRequestException({ message: "Invalid token ❌" });
+  }
+
+  const user = await findOne({
+    model: UserModel,
+    filter: {
+      _id: decoded.userId,
+      role: RoleEnum.User  
     }
-  })
-  if(checkEmailExists){
-    throw  ConflictException({message:"Email Already Exists ‼️"})
+  });
 
+  if (!user) {
+    throw NotFoundException({ message: "User not found ❌" });
   }
-  // Store
-  const [user] = await create({ model:UserModel 
-    , data : [{userName , email , password: await generateHash(password) , Provider: ProviderEnum.System  }] })
-    // Send a verification code to email after registration
-      emailEmitter.emit("sendEmail" ,async ()=>{
-          await verifyEmailOtp({email })
-      })
-  return {userName , email ,  password:user.password }
-}
 
+  // activate ONLY user
+  user.status = AdminApproachEnum.ACTIVE;
+  await user.save();
+
+  return { message: "Account activated successfully ✔️" };
+};
+
+
+// export const activateAccount = async (token) => {
+
+//   const decoded = await verifyToken({ token , secretKey:  Admin_TOKEN_SECURITY_KEY });
+
+//   if (decoded.type !== AdminApproachEnum.ACTIVE) {
+//     throw BadRequestException({ message: "Invalid token ❌" });
+//   }
+
+//      // 1. validate token type
+//     if (decoded.type !== AdminApproachEnum.ACTIVE ) {
+//         throw BadRequestException({ message: "Invalid token ❌" });
+//     }
+
+//     // 2. find user by ID (NOT email)
+//     const user = await findOne({
+//         model: UserModel,
+//         filter: { _id: decoded.userId }
+//     });
+
+//   if (!user) {
+//     throw NotFoundException({ message: "User not found ❌" });
+//   }
+
+//   user.status = AdminApproachEnum.ACTIVE
+//   await user.save();
+
+//   return { message: "Account activated successfully ✔️" };
+// };
 //Confirm Email with otp..
-export const confirmEmail = async(inputs)=>{
-  const {email , otp} = inputs
-    const account = await findOne({
-    model:UserModel ,
-    select :"email" ,
-    filter:{email , confirmEmail: { $eq: null } , Provider:ProviderEnum.System } 
-  })
-  if(!account){
-    throw NotFoundException({message:"Fail to find Match account ❌"})
-  }
-  const hashOtp = await get(otpKey({email}))
-  if(!hashOtp){
-    throw NotFoundException({message : "Expired OTP 😊"})
-  }
-  if(!await compareHash(otp , hashOtp )){
-    throw ConflictException({message :"Invalid OTP ❌"})
-  }
-  account.confirmEmail = new Date()
-  await account.save()
+// export const confirmEmail = async(inputs)=>{
+//   const {email , otp} = inputs
+//     const account = await findOne({
+//     model:UserModel ,
+//     select :"email" ,
+//     filter:{email , confirmEmail: { $eq: null } , Provider:ProviderEnum.System } 
+//   })
+//   if(!account){
+//     throw NotFoundException({message:"Fail to find Match account ❌"})
+//   }
+//   const hashOtp = await get(otpKey({email}))
+//   if(!hashOtp){
+//     throw NotFoundException({message : "Expired OTP 😊"})
+//   }
+//   if(!await compareHash(otp , hashOtp )){
+//     throw ConflictException({message :"Invalid OTP ❌"})
+//   }
+//   account.confirmEmail = new Date()
+//   await account.save()
 
-  await deleteKeys(await keys(otpKey({email })))
-  return ;
-}
+//   await deleteKeys(await keys(otpKey({email })))
+//   return ;
+// }
 
-export const reSendConfirmEmail = async(inputs)=>{
-  const {email} = inputs
-    const account = await findOne({
-    model:UserModel ,
-    select :"email" ,
-    filter:{email , confirmEmail: { $eq: null } , Provider:ProviderEnum.System } 
-  })
-  if(!account){
-    throw NotFoundException({message:"Fail to find Match account ❌"})
+export const login = async (inputs, issuer) => {
+  const { email, password } = inputs;
+
+  // 1. find user
+  const user = await findOne({
+    model: UserModel,
+    filter: { email, Provider: ProviderEnum.System }
+  });
+
+  if (!user) {
+    throw NotFoundException({ message: "Invalid credentials ❌" });
   }
-    // Re-Send a verification code to email after registration
-  await verifyEmailOtp({email})
-  return ;
-}
+
+  // 2. password check
+  const match = await compareHash(password, user.password);
+
+  if (!match) {
+    throw NotFoundException({ message: "Invalid credentials ❌" });
+  }
+
+  // 3. admin bypass
+  const isAdmin = user.role === RoleEnum.Admin;
+
+  // 4. USER ONLY status logic
+  if (!isAdmin) {
+    switch (user.status) {
+      case AdminApproachEnum.PENDING:
+        throw UnauthorizedException({
+          message: "Account not approved yet ⏳"
+        });
+
+      case AdminApproachEnum.REJECTED:
+        throw UnauthorizedException({
+          message: "Account rejected ❌"
+        });
+
+      case AdminApproachEnum.APPROVED:
+        throw UnauthorizedException({
+          message: "Account not activated yet ⚡"
+        });
+
+      case AdminApproachEnum.ACTIVE:
+        break;
+
+      default:
+        throw UnauthorizedException({
+          message: "Invalid account status"
+        });
+    }
+  }
+
+  // 6. generate tokens
+  return await createLoginCredentials(user, issuer);
+};
+// export const reSendConfirmEmail = async(inputs)=>{
+//   const {email} = inputs
+//     const account = await findOne({
+//     model:UserModel ,
+//     select :"email" ,
+//     filter:{email , confirmEmail: { $eq: null } , Provider:ProviderEnum.System } 
+//   })
+//   if(!account){
+//     throw NotFoundException({message:"Fail to find Match account ❌"})
+//   }
+//     // Re-Send a verification code to email after registration
+//   await verifyEmailOtp({email})
+//   return ;
+// }
 
 // Forget Password ...
 // 1- Request Code ..
@@ -166,94 +365,6 @@ export const resendForgotPasswordCode= async({email , otp , password })=>{
   return ;
 }
 
-export const login = async(inputs , issuer)=>{
-  const {email , password} = inputs 
-  const user = await findOne({
-    model:UserModel ,
-    filter:{email ,Provider:ProviderEnum.System}
-  })
-  if(!user){
-    throw NotFoundException({message:"Invalid Login Credentials ❌"})
-  }
-  //Hash Password
-  const match = await compareHash(password , user.password )
-  if(!match){
-        throw NotFoundException({message : "Invalid Login Credentials .❌"})
-  }
-      // Token 
-  return await createLoginCredentials(user , issuer)
-}
 
 
-const verifyGoogleAccount = async(idToken)=>{
-    const client = new OAuth2Client();
-    const ticket = await client.verifyIdToken({
-        idToken,
-        audience: ClientID , 
-    });
-    const payload = ticket.getPayload();
-    console.log(payload);
-    if(!payload?.email_verified){
-      throw BadRequestException({message:"Fail to verify authenticated this account with google 🫠"})
 
-    }
-    return payload
-
-
-}
-
-export const loginWithGmail = async({idToken , issuer})=>{
-  if (!idToken) {
-    throw new BadRequestException({ message: "idToken is required" });
-}
-  const payload = await verifyGoogleAccount(idToken)
-  const user = await findOne({model:UserModel , email:payload.email  , provider:ProviderEnum.Google })
-  if(!user){
-    throw NotFoundException({message : "Invalid Login Credentials ."})
-
-  }
-
-  return await createLoginCredentials(user, issuer) 
-}
-
-export const signupWithGmail = async({idToken , issuer})=>{
-  if (!idToken) {
-    throw new BadRequestException({ message: "idToken is required" });
-}
-const payload = await verifyGoogleAccount(idToken)
-//  1- User Exists in Database  And Provider == System  ==> Throw Error ..
-//  2- User Exists in Database  And Provider == Google  ==> Redirect google Login 
-//  3- User Not Exists ==> Create with Provider Google .
-  const checkUserExist = await findOne({model:UserModel , email:payload.email })
-  if(checkUserExist){
-    // 1- User Exists in Database  And Provider == System  ==> Throw Error ..
-    if(checkUserExist.provider == ProviderEnum.System){
-    throw ConflictException({message:"Account Already Exist With Different Provider ‼️"})
-
-  }
-  // 2- User Exists in Database  And Provider == Google  ==> Redirect google Login 
-  // const result = await loginWithGmail({idToken} , issuer )
-
-  // return {result , status:200 }
-    const token = await createLoginCredentials(checkUserExist, issuer);
-    return { account: token, status: 200 };
-
-  }
-
-  //  3- User Not Exists ==> Create with Provider Google .
-  // New user → create + login
-  const newUser = await createOne({
-    model: UserModel,
-    data: {
-      firstName: payload.given_name || '',
-      lastName: payload.family_name || '',
-      email: payload.email,
-      provider: ProviderEnum.Google,
-      profilePicture: payload.picture,
-      confirmEmail: new Date()
-    }
-  });
-
-  const token = await createLoginCredentials(newUser, issuer);
-  return { account: token , status: 201 };
-}

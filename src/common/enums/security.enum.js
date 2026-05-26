@@ -6,7 +6,8 @@ export const HashEnum = {
 }
 
 export const AudienceEnum = {
-    User : 1 ,
+    User: "user",
+    Admin: "admin"
 }
 
 export const TokenTypeEnum = {
