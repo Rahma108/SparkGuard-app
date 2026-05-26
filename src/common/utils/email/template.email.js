@@ -97,7 +97,7 @@ export const approvalTemplate = ({ name, link }) => {
       <!-- Header -->
       <div style="background:linear-gradient(135deg,#f59e0b,#f97316);
                   padding:25px;text-align:center;color:#000;">
-        <h2 style="margin:0;font-size:22px;">⚡ Electricity System</h2>
+        <h2 style="margin:0;font-size:22px;">⚡Electricity System</h2>
         <p style="margin:5px 0 0;font-size:13px;">Account Activation Portal</p>
       </div>
 
@@ -117,7 +117,7 @@ export const approvalTemplate = ({ name, link }) => {
            background:linear-gradient(135deg,#f59e0b,#f97316);
            color:#000;text-decoration:none;
            border-radius:8px;font-weight:bold;font-size:14px;">
-          ⚡ Activate Account
+          ⚡Activate Account
         </a>
 
         <p style="margin-top:20px;font-size:12px;color:#94a3b8;">
