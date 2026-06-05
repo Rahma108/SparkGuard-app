@@ -1,14 +1,9 @@
 
 
 //   Layer Database ...................................
-export const create = async( {
-    model ,
-    data ,
-    options = {validateBeforeSave : true} 
-
-} = {})=>{
-    return await model.create(data , options) || [] 
-}
+export const create = async ({ model, data, options } = {}) => {
+    return await model.create(data, options);
+};
 
 export const createOne = async( {
     model ,

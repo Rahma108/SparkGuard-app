@@ -49,6 +49,7 @@ export const verifyEmailOtp = async({ email , subject=EmailEnum.ConfirmEmail , t
       return ;
 }
 
+
 export const signup = async (inputs) => {
   const { userName, email, password } = inputs;
 
@@ -61,16 +62,16 @@ export const signup = async (inputs) => {
     throw ConflictException({ message: "Email already exists ‼️" });
   }
 
-  const [user] = await create({
-    model: UserModel,
-    data: [{
-      userName,
-      email,
-      password: await generateHash(password),
-      Provider: ProviderEnum.System,
-      status: AdminApproachEnum.PENDING
-    }]
-  });
+  const user = await create({
+  model: UserModel,
+  data: {
+    userName,
+    email,
+    password: await generateHash(password),
+    provider: ProviderEnum.System,
+    status: AdminApproachEnum.PENDING
+  }
+});
 
   return {
     message: "Signup successful, waiting for admin approval ⏳"

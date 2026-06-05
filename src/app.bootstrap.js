@@ -7,10 +7,10 @@ import cors from 'cors'
 import { connectRedis , connectDB  } from './DB/index.js';
 import helmet from 'helmet';
 import { Limiter } from './common/utils/middleware/limiter.js';
+import './jobs/corn.cleanUsers.job.js'
 console.log({NODE_ENV});
 async function bootstrap(){
 const app = express()
-
 // convert buffer data .....................
 app.set("trust proxy", true)
 app.use(express.json());

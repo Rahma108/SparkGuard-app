@@ -2,7 +2,6 @@
 import {resolve} from 'node:path'
 import {config} from 'dotenv'
 
-// لازم اعمل install ===> npm i cross-env 
 export const NODE_ENV = process.env.NODE_ENV
 
 const envPath = {

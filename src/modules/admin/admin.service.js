@@ -1,3 +1,4 @@
+import { AdminApproachEnum } from "../../common/enums/email.enum.js";
 import { RoleEnum } from "../../common/enums/user.enum.js";
 import { NotFoundException } from "../../common/utils/index.js";
 import { UserModel } from "../../DB/index.js";
@@ -94,3 +95,15 @@ export const getAllDeletedUsers= async () => {
     }));
 };
 
+// getAllActivated
+export const getAllActiveUsers= async () => {
+    const users = await UserModel.find({ status: AdminApproachEnum.ACTIVE , role: { $ne: RoleEnum.Admin } })
+        .select("email role _id status");
+
+    return users.map(user => ({
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        status:user.status
+    }));
+};
