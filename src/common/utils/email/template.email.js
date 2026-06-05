@@ -90,27 +90,31 @@ export const emailTemplate = ({code , title} = {})=>{
 }
 
 export const approvalTemplate = ({ name, link }) => {
-  return `
+  return`
   <div style="background:#ffffff; padding:30px; font-family: Arial, sans-serif;">
     <div style="max-width:600px; margin:auto; background:#ffffff; border-radius:14px; overflow:hidden;
                 box-shadow:0 4px 24px rgba(0,0,0,0.10); border:1px solid #e5e7eb;">
 
       <!-- Header -->
-     <div style="background: linear-gradient(135deg, #1d4ed8, #2563eb); padding:30px 25px 20px; text-align:center;">
+      <div style="background: linear-gradient(135deg, #1d4ed8, #2563eb); padding:30px 25px 20px; text-align:center;">
 
-  <!-- ✅ Logo circle - fixed -->
-  <div style="width:90px; height:90px; margin:0 auto 14px; border-radius:50%; background:#ffffff;
-              display:flex; align-items:center; justify-content:center;
-              border:4px solid #fbbf24; box-shadow:0 0 0 6px rgba(251,191,36,0.2);">
-    <svg width="44" height="54" viewBox="0 0 32 40" xmlns="http://www.w3.org/2000/svg">
-      <polygon points="18,0 6,22 16,22 14,40 26,18 16,18" fill="#fbbf24"/>
-    </svg>
-  </div>
+        <table border="0" cellpadding="0" cellspacing="0" style="margin:0 auto 14px auto;">
+          <tr>
+            <td align="center" valign="middle"
+                style="width:90px; height:90px; border-radius:50%; background:#ffffff;
+                       border:4px solid #fbbf24; text-align:center; vertical-align:middle;">
+              <svg width="36" height="44" viewBox="0 0 32 40" xmlns="http://www.w3.org/2000/svg"
+                   style="display:block; margin:auto;">
+                <polygon points="18,0 6,22 16,22 14,40 26,18 16,18" fill="#fbbf24"/>
+              </svg>
+            </td>
+          </tr>
+        </table>
 
-  <div>
-    <span style="font-size:20px; font-weight:900; color:#fff; letter-spacing:1px;">SPARK</span>
-    <span style="font-size:20px; font-weight:900; color:#fbbf24; letter-spacing:1px;"> GUARD</span>
-  </div>
+        <div>
+          <span style="font-size:20px; font-weight:900; color:#fff; letter-spacing:1px;">SPARK</span>
+          <span style="font-size:20px; font-weight:900; color:#fbbf24; letter-spacing:1px;"> GUARD</span>
+        </div>
         <p style="margin:6px 0 0; font-size:12px; color:#bfdbfe; letter-spacing:2px; text-transform:uppercase;">Electricity Management System</p>
       </div>
 
@@ -147,5 +151,5 @@ export const approvalTemplate = ({ name, link }) => {
 
     </div>
   </div>
-`;
+`
 };
