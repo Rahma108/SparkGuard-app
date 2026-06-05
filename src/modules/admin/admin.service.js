@@ -51,7 +51,7 @@ export const getAllUsersService = async () => {
 export const softDeleteUserService = async (userId) => {
     const user = await UserModel.findByIdAndUpdate(
         userId,
-        { isDeleted: true },
+        { isDeleted: true  , status: AdminApproachEnum.PENDING },
         { new: true }
     );
 
@@ -67,7 +67,7 @@ export const restoreUserService = async (userId) => {
 
     const user = await UserModel.findByIdAndUpdate(
         userId,
-        { isDeleted: false },
+        { isDeleted: false , status: AdminApproachEnum.ACTIVE },
         { new: true }
     );
 
