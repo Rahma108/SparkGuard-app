@@ -28,24 +28,10 @@ const userSchema = new mongoose.Schema({
                     return this.provider === ProviderEnum.System
         }
         },
-        gender:{
-            type:Number, 
-            enum :Object.values(GenderEnum),
-            default : GenderEnum.Male 
-        },
-        phone:{
-            type:String ,
-            default: null
-        },
         status: {
             type: String,
             enum: Object.values(AdminApproachEnum),
             default: AdminApproachEnum.PENDING
-        },
-
-        confirmEmail: {
-            type: Date,
-            default: null
         },
         provider:{
             type:Number , 

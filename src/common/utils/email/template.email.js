@@ -1,6 +1,6 @@
 import { GITHUB, INSTAGRAM_LINK, LINKEDIN_LINK} from "../../../../config/config.service.js"
 
-export const emailTemplate = ({code , title} = {})=>{
+export const emailTemplate = ({code, title} = {}) => {
     return `<!DOCTYPE html>
 <html>
 <head>
@@ -17,11 +17,6 @@ export const emailTemplate = ({code , title} = {})=>{
   <tr><td style="padding:20px 25px;">
     <table border="0" width="100%"><tr>
       <td>
-        <div style="display:inline-block;background:#1d4ed8;border-radius:50%;padding:8px;border:2px solid #fbbf24;vertical-align:middle;">
-          <svg width="20" height="26" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="18,0 6,22 16,22 14,40 26,18 16,18" fill="#fbbf24"/>
-          </svg>
-        </div>
         <span style="font-size:16px;font-weight:900;color:#1d4ed8;vertical-align:middle;letter-spacing:1px;">SPARK</span>
         <span style="font-size:16px;font-weight:900;color:#fbbf24;vertical-align:middle;letter-spacing:1px;"> GUARD</span>
       </td>
@@ -36,15 +31,7 @@ export const emailTemplate = ({code , title} = {})=>{
     <table border="0" cellpadding="0" cellspacing="0" style="text-align:center;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
       
       <!-- Blue header -->
-      <tr><td style="background:linear-gradient(135deg,#1d4ed8,#2563eb);height:90px;text-align:center;vertical-align:middle;">
-        <div style="display:inline-block;background:rgba(255,255,255,0.15);border-radius:50%;padding:12px;border:2px solid rgba(251,191,36,0.5);">
-          <div style="background:#1d4ed8;border-radius:50%;padding:8px;border:2px solid #fbbf24;display:inline-block;">
-            <svg width="24" height="30" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="18,0 6,22 16,22 14,40 26,18 16,18" fill="#fbbf24"/>
-            </svg>
-          </div>
-        </div>
-      </td></tr>
+      <tr><td style="background:linear-gradient(135deg,#1d4ed8,#2563eb);height:60px;"></td></tr>
 
       <!-- Title -->
       <tr><td style="padding-top:25px;">
@@ -90,27 +77,13 @@ export const emailTemplate = ({code , title} = {})=>{
 }
 
 export const approvalTemplate = ({ name, link }) => {
-  return`
+  return `
   <div style="background:#ffffff; padding:30px; font-family: Arial, sans-serif;">
     <div style="max-width:600px; margin:auto; background:#ffffff; border-radius:14px; overflow:hidden;
                 box-shadow:0 4px 24px rgba(0,0,0,0.10); border:1px solid #e5e7eb;">
 
       <!-- Header -->
       <div style="background: linear-gradient(135deg, #1d4ed8, #2563eb); padding:30px 25px 20px; text-align:center;">
-
-        <table border="0" cellpadding="0" cellspacing="0" style="margin:0 auto 14px auto;">
-          <tr>
-            <td align="center" valign="middle"
-                style="width:90px; height:90px; border-radius:50%; background:#ffffff;
-                       border:4px solid #fbbf24; text-align:center; vertical-align:middle;">
-              <svg width="36" height="44" viewBox="0 0 32 40" xmlns="http://www.w3.org/2000/svg"
-                   style="display:block; margin:auto;">
-                <polygon points="18,0 6,22 16,22 14,40 26,18 16,18" fill="#fbbf24"/>
-              </svg>
-            </td>
-          </tr>
-        </table>
-
         <div>
           <span style="font-size:20px; font-weight:900; color:#fff; letter-spacing:1px;">SPARK</span>
           <span style="font-size:20px; font-weight:900; color:#fbbf24; letter-spacing:1px;"> GUARD</span>
@@ -152,4 +125,58 @@ export const approvalTemplate = ({ name, link }) => {
     </div>
   </div>
 `
+};
+
+export const rejectionTemplate = ({ name }) => {
+  return `
+  <div style="background:#ffffff; padding:30px; font-family: Arial, sans-serif;">
+    <div style="max-width:600px; margin:auto; background:#ffffff; border-radius:14px; overflow:hidden;
+                box-shadow:0 4px 24px rgba(0,0,0,0.10); border:1px solid #e5e7eb;">
+
+      <!-- Header -->
+      <div style="background: linear-gradient(135deg, #1d4ed8, #2563eb); padding:30px 25px 20px; text-align:center;">
+        <div>
+          <span style="font-size:20px; font-weight:900; color:#fff; letter-spacing:1px;">SPARK</span>
+          <span style="font-size:20px; font-weight:900; color:#fbbf24; letter-spacing:1px;"> GUARD</span>
+        </div>
+        <p style="margin:6px 0 0; font-size:12px; color:#bfdbfe; letter-spacing:2px; text-transform:uppercase;">
+          Electricity Management System
+        </p>
+      </div>
+
+      <!-- Title -->
+      <div style="background:#eff6ff; padding:14px 25px; text-align:center; border-bottom:2px solid #f87171;">
+        <h2 style="margin:0; font-size:16px; color:#dc2626; letter-spacing:1px;">
+          ❌ Account Request Update
+        </h2>
+      </div>
+
+      <!-- Body -->
+      <div style="padding:35px 30px; text-align:center; color:#1f2937;">
+        <h3 style="margin-bottom:10px; color:#1d4ed8; font-size:18px;">
+          Hello ${name || "Engineer"} 👷‍♂️
+        </h3>
+
+        <p style="font-size:14px; line-height:1.8; color:#374151;">
+          We regret to inform you that your account request has been 
+          <b style="color:#dc2626;">rejected</b> by the system administrator.
+        </p>
+
+        <div style="height:1px; background:linear-gradient(to right, transparent, #dc2626, #fbbf24, #dc2626, transparent); margin:25px 0;"></div>
+
+        <p style="font-size:13px; color:#6b7280;">
+          If you believe this was a mistake, please contact support or try registering again with valid information.
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div style="background:#f3f4f6; border-top:1px solid #e5e7eb; text-align:center; padding:16px; font-size:11px; color:#9ca3af;">
+        <span style="color:#1d4ed8; font-weight:bold;">SPARK</span>
+        <span style="color:#fbbf24; font-weight:bold;">GUARD</span>
+        &nbsp;•&nbsp; Electricity Management System &nbsp;•&nbsp; Secure Access Portal
+      </div>
+
+    </div>
+  </div>
+  `;
 };

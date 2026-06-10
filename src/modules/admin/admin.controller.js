@@ -2,7 +2,7 @@ import {Router} from 'express'
 import { authentication, authorization, successResponse } from '../../common/utils/index.js';
 import { getAllActiveUsers, getAllDeletedUsers, getAllUsersService, getPredictionsService, getStatsService, restoreUserService, softDeleteUserService } from './admin.service.js';
 import { endPoint } from '../user/user.authorization.js';
-import { approveUser } from '../auth/auth.service.js';
+import { approveUser, rejectUser } from '../auth/auth.service.js';
 
 
 const router = Router() 
@@ -10,12 +10,23 @@ const router = Router()
 router.patch(
     "/approve/:id",
     authentication(),
+    authorization(endPoint.adminStats),
     async (req, res) => {
         const result = await approveUser(req.params.id);
         return successResponse({ res, result });
     }
 );
 
+
+router.patch(
+    "/reject/:id",
+    authentication(),
+    authorization(endPoint.adminStats),
+    async (req, res) => {
+        const result = await rejectUser(req.params.id);
+        return successResponse({ res, result });
+    }
+);
 // GET /admin/stats
 // total predictions
 // theft (not normal)

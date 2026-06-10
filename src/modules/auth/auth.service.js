@@ -5,7 +5,7 @@ import { create, createOne, findOne, findOneAndUpdate, UserModel } from "../../D
 import { AdminApproachEnum, EmailEnum } from "../../common/enums/index.js"
 import { ProviderEnum, RoleEnum } from "../../common/enums/user.enum.js"
 import { baseRevokeTokenKey, deleteKeys, get, increment, keys, otpBlockKey, otpKey, otpMaxRequestKey, set, ttl} from "../../common/services/index.js"
-import { sendApprovalEmail } from "../../common/utils/email/adminApproval.email.js"
+import { sendApprovalEmail, sendRejectionEmail } from "../../common/utils/email/adminApproval.email.js"
 import { createNumberOtp, emailEmitter, emailTemplate, sendEmail} from "../../common/utils/index.js"
 import { BadRequestException, ConflictException, NotFoundException, UnauthorizedException} from "../../common/utils/response/index.js"
 import {  generateHash , compareHash, createLoginCredentials, verifyToken, generateToken} from "../../common/utils/security/index.js"
@@ -82,14 +82,13 @@ export const approveUser = async (userId) => {
 
   const user = await findOne({
     model: UserModel,
-    filter: { _id: userId }
+    filter: { _id: userIdو , status: AdminApproachEnum.PENDING }
   });
 
   if (!user) {
     throw NotFoundException({ message: "User not found ❌" });
   }
 
-  //  ممنوع admin يتأثر
   if (user.role === RoleEnum.Admin) {
     throw BadRequestException({ message: "Admins cannot be activated ❌" });
   }
@@ -118,6 +117,35 @@ export const approveUser = async (userId) => {
 
   return { message: "User approved successfully 🚀" };
 };
+
+export const rejectUser = async (userId) => {
+
+  const user = await findOne({
+    model: UserModel,
+    filter: { _id: userId, status: AdminApproachEnum.PENDING }
+  });
+
+  if (!user) {
+    throw NotFoundException({ message: "User not found or already processed ❌" });
+  }
+
+  if (user.role === RoleEnum.Admin) {
+    throw BadRequestException({ message: "Admins cannot be rejected ❌" });
+  }
+
+  user.status = AdminApproachEnum.REJECTED;
+  await user.save();
+
+  emailEmitter.emit("sendEmail", async () => {
+    await sendRejectionEmail({
+      email: user.email,
+      name: user.userName
+    });
+  });
+
+  return { message: "User rejected successfully ❌" };
+};
+
 export const activateAccount = async (token) => {
 
   const decoded = await verifyToken({
@@ -203,31 +231,11 @@ export const login = async (inputs, issuer) => {
   // 6. generate tokens
   return await createLoginCredentials(user, issuer);
 };
-// export const reSendConfirmEmail = async(inputs)=>{
-//   const {email} = inputs
-//     const account = await findOne({
-//     model:UserModel ,
-//     select :"email" ,
-//     filter:{email , confirmEmail: { $eq: null } , Provider:ProviderEnum.System } 
-//   })
-//   if(!account){
-//     throw NotFoundException({message:"Fail to find Match account ❌"})
-//   }
-//     // Re-Send a verification code to email after registration
-//   await verifyEmailOtp({email})
-//   return ;
-// }
-
-// Forget Password ...
-// 1- Request Code ..
-// 2- Verify Code ...
-// 3- Update Code ..
-
 export const requestForgotPasswordCode = async({email})=>{
     const account = await findOne({
     model:UserModel ,
     select :"email" ,
-    filter:{email , confirmEmail:{ $ne: null } , Provider:ProviderEnum.System } 
+    filter:{email , status:AdminApproachEnum.ACTIVE, provider:ProviderEnum.System } 
   })
   if(!account){
     throw NotFoundException({message:"Fail to find Match account ❌"})
@@ -254,7 +262,7 @@ export const resendForgotPasswordCode= async({email , otp , password })=>{
     await verifyForgotPasswordCode({email ,otp })
     const account = await findOneAndUpdate({
       model:UserModel ,
-      filter :{email , confirmEmail:{ $ne: null } , Provider:ProviderEnum.System } ,
+      filter :{email , status: AdminApproachEnum.ACTIVE, provider:ProviderEnum.System } ,
       update:{
         password:await generateHash(password),
         changeCredentialTime:new Date() // All Logout
