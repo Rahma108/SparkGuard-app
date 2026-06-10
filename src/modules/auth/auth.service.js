@@ -82,7 +82,7 @@ export const approveUser = async (userId) => {
 
   const user = await findOne({
     model: UserModel,
-    filter: { _id: userIdو , status: AdminApproachEnum.PENDING }
+    filter: { _id: userId , status: AdminApproachEnum.PENDING }
   });
 
   if (!user) {
