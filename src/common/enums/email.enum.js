@@ -10,5 +10,6 @@ export const AdminApproachEnum = {
         PENDING : "PENDING",    // signup
         ACTIVE : "ACTIVE",     // user clicked activation link
         REJECTED:"REJECTED",   // admin rejected
-        APPROVED :"APPROVED"   // admin approved + email sent
+        APPROVED :"APPROVED" ,  // admin approved + email 
+        DELETED:"DELETED"
 }

@@ -1,6 +1,6 @@
 import { AdminApproachEnum } from "../../common/enums/email.enum.js";
 import { RoleEnum } from "../../common/enums/user.enum.js";
-import { NotFoundException } from "../../common/utils/index.js";
+import { NotFoundException , BadRequestException } from "../../common/utils/index.js";
 import { UserModel } from "../../DB/index.js";
 import { PredictionModel } from "../../DB/model/prediction.model.js";
 
@@ -49,38 +49,70 @@ export const getAllUsersService = async () => {
 
 
 export const softDeleteUserService = async (userId) => {
-    const user = await UserModel.findByIdAndUpdate(
-        userId,
-        { isDeleted: true  , status: AdminApproachEnum.PENDING },
-        { new: true }
-    );
+
+    const user = await UserModel.findById(userId);
 
     if (!user) {
         throw NotFoundException({ message: "User not found" });
     }
 
+    //  لو already deleted
+    if (user.isDeleted || user.status === AdminApproachEnum.DELETED) {
+        throw BadRequestException({
+            message: "User is already deleted❕"
+        });
+    }
+
+    //  لو rejected
+    if (user.status === AdminApproachEnum.REJECTED) {
+        throw BadRequestException({
+            message: "Cannot delete a rejected user❌"
+        });
+    }
+
+    //  الحالات المسموح بيها بس
+    const allowedStatuses = [
+        AdminApproachEnum.ACTIVE,
+        AdminApproachEnum.PENDING,
+        AdminApproachEnum.APPROVED
+    ];
+
+    if (!allowedStatuses.includes(user.status)) {
+        throw BadRequestException({
+            message: "User cannot be deleted in this state"
+        });
+    }
+
+    //  حفظ الحالة القديمة
+    user.previousStatus = user.status;
+
+    //  soft delete
+    user.status = AdminApproachEnum.DELETED;
+    user.isDeleted = true;
+
+    await user.save();
+
     return { message: "User deleted successfully" };
 };
 
-
 export const restoreUserService = async (userId) => {
 
-    const user = await UserModel.findByIdAndUpdate(
-        userId,
-        { isDeleted: false , status: AdminApproachEnum.ACTIVE },
-        { new: true }
-    );
+    const user = await UserModel.findById(userId);
 
     if (!user) {
         throw NotFoundException({ message: "User not found ✖️" });
     }
 
+    user.status = user.previousStatus || AdminApproachEnum.PENDING; 
+    user.isDeleted = false;
+    user.previousStatus = undefined; 
+
+    await user.save();
+
     return {
         message: "User restored successfully"
     };
 };
-
-
 
 // Get all Users Deleted ... btn deleted
 // getAllDeletedUsers

@@ -47,6 +47,10 @@ const userSchema = new mongoose.Schema({
             type: Boolean,
             default: false
             },
+        previousStatus: {
+            type: String,
+            enum: Object.values(AdminApproachEnum)
+        },
         oldPasswords:[String],
         changeCredentialTime:{type:Date }  // Logout
 },{
