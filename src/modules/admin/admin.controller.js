@@ -1,6 +1,6 @@
 import {Router} from 'express'
 import { authentication, authorization, successResponse } from '../../common/utils/index.js';
-import { getAllActiveUsers, getAllDeletedUsers, getAllUsersService, getPredictionsService, getStatsService, restoreUserService, softDeleteUserService } from './admin.service.js';
+import { getAllActiveUsers, getAllDeletedUsers, getAllRejectedUsers, getAllUsersService, getPredictionsService, getStatsService, restoreUserService, softDeleteUserService } from './admin.service.js';
 import { endPoint } from '../user/user.authorization.js';
 import { approveUser, rejectUser } from '../auth/auth.service.js';
 
@@ -138,12 +138,26 @@ router.get(
 // Get all Users Active status ... btn deleted
 
 router.get(
-    "/activatedUsers",
+    "/activated-users",
     authentication(),
     authorization(endPoint.adminStats),
     async (req, res, next) => {
         try {
         const result = await getAllActiveUsers();
+        return successResponse({ res, result });
+        } catch (error) {
+        next(error);
+        }
+    }
+);
+
+router.get(
+    "/rejected-users",
+    authentication(),
+    authorization(endPoint.adminStats),
+    async (req, res, next) => {
+        try {
+        const result = await getAllRejectedUsers();
         return successResponse({ res, result });
         } catch (error) {
         next(error);

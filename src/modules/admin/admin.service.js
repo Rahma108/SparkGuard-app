@@ -107,3 +107,17 @@ export const getAllActiveUsers= async () => {
         status:user.status
     }));
 };
+
+export const getAllRejectedUsers = async () => {
+    const users = await UserModel.find({
+        status: AdminApproachEnum.REJECTED,
+        role: { $ne: RoleEnum.Admin}
+    }).select("email role _id status");
+
+    return users.map(({ _id, email, role, status }) => ({
+        id: _id,
+        email,
+        role,
+        status
+    }));
+};
