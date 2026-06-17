@@ -8,9 +8,16 @@ import { connectRedis , connectDB  } from './DB/index.js';
 import helmet from 'helmet';
 import { Limiter } from './common/utils/middleware/limiter.js';
 import './jobs/corn.cleanUsers.job.js'
+import { resolve } from 'node:path'
 console.log({NODE_ENV});
 async function bootstrap(){
 const app = express()
+
+// load static files 
+const uploadPath = resolve("./uploads");
+
+app.use("/upload", express.static(uploadPath));
+
 // convert buffer data .....................
 app.set("trust proxy", true)
 app.use(express.json());

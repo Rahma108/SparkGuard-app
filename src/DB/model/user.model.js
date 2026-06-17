@@ -28,6 +28,9 @@ const userSchema = new mongoose.Schema({
                     return this.provider === ProviderEnum.System
         }
         },
+    profilePicture : {
+            type:String
+        },
         status: {
             type: String,
             enum: Object.values(AdminApproachEnum),

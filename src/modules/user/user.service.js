@@ -6,7 +6,8 @@ import { LogoutEnum } from '../../common/enums/security.enum.js';
 import {baseRevokeTokenKey, deleteKeys, keys, revokeTokenKey, set} from '../../common/services/index.js'
 import { compareHash, ConflictException, decrypt, generateHash } from "../../common/utils/index.js";
 import { ACCESS_EXPIRES_IN, REFRESH_EXPIRES_IN } from "../../../config/config.service.js";
-
+import fs from 'fs'
+import path, { resolve } from 'node:path';
 
 
 export const updatePassword= async  ({oldPassword , password} , user , issuer )=>{
@@ -57,6 +58,43 @@ export const updatedProfile= async  (user , data)=>{
         userName: user.userName,
         email: user.email
     }
+}
+
+export const profilePicture = async(file , user )=>{
+    //Upload Profile Picture API
+    if (user.profilePicture) {
+        const oldPath = resolve(`./upload/general/${user.profilePicture}`);
+        console.log("Deleting:", oldPath);
+
+        console.log("DB VALUE:", user.profilePicture);
+        console.log("FINAL PATH:", resolve(`./upload/general/${user.profilePicture}`));
+        if (fs.existsSync(oldPath)) { 
+            fs.unlinkSync(oldPath); 
+        }
+
+}
+        // user.profilePicture = file.finalPath;
+        user.profilePicture = file.filename;
+        await user.save();
+
+    return user;
+}
+
+
+export const removeProfilePicture = async(user )=>{
+    //Upload Profile Picture API
+    if (!user.profilePicture) {
+        throw NotFoundException("Profile Picture is Not Found ❌")
+}
+    const path = resolve(`./upload/general/${user.profilePicture}`);
+    if (fs.existsSync(path)) { 
+            fs.unlinkSync(path); 
+        }
+        // user.profilePicture = file.finalPath;
+        user.profilePicture = null
+        await user.save();
+
+    return user;
 }
 
 export const createRevokeToken = async( { userId ,jti , ttl  })=>{
