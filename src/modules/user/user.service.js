@@ -60,42 +60,53 @@ export const updatedProfile= async  (user , data)=>{
     }
 }
 
-export const profilePicture = async(file , user )=>{
-    //Upload Profile Picture API
+
+const BASE_PATH = resolve("./uploads/general");
+
+export const profilePicture = async (file, user) => {
+
+    if (!file) {
+        throw new Error("No file uploaded ❌");
+    }
+
+    // حذف القديمة
     if (user.profilePicture) {
-        const oldPath = resolve(`./upload/general/${user.profilePicture}`);
-        console.log("Deleting:", oldPath);
+        const oldPath = resolve(BASE_PATH, user.profilePicture);
 
-        console.log("DB VALUE:", user.profilePicture);
-        console.log("FINAL PATH:", resolve(`./upload/general/${user.profilePicture}`));
-        if (fs.existsSync(oldPath)) { 
-            fs.unlinkSync(oldPath); 
+        if (fs.existsSync(oldPath)) {
+            fs.unlinkSync(oldPath);
         }
+    }
 
-}
-        // user.profilePicture = file.finalPath;
-        user.profilePicture = file.filename;
-        await user.save();
+    // DB: نخزن filename فقط
+    user.profilePicture = file.filename;
+    await user.save();
 
-    return user;
-}
+    return {
+        message: "Profile picture uploaded successfully ✅",
+        finalPath: file.finalPath,         
+        filename: file.filename
+    };
+};
+export const removeProfilePicture = async (user) => {
 
-
-export const removeProfilePicture = async(user )=>{
-    //Upload Profile Picture API
     if (!user.profilePicture) {
-        throw NotFoundException("Profile Picture is Not Found ❌")
-}
-    const path = resolve(`./upload/general/${user.profilePicture}`);
-    if (fs.existsSync(path)) { 
-            fs.unlinkSync(path); 
-        }
-        // user.profilePicture = file.finalPath;
-        user.profilePicture = null
-        await user.save();
+        throw new Error("Profile Picture is Not Found ❌");
+    }
 
-    return user;
-}
+    const imagePath = resolve(BASE_PATH, user.profilePicture);
+
+    if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+    }
+
+    user.profilePicture = null;
+    await user.save();
+
+    return {
+        message: "Profile picture removed successfully ✅"
+    };
+};
 
 export const createRevokeToken = async( { userId ,jti , ttl  })=>{
     await set({

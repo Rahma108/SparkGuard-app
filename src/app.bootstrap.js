@@ -14,9 +14,7 @@ async function bootstrap(){
 const app = express()
 
 // load static files 
-const uploadPath = resolve("./uploads");
-
-app.use("/upload", express.static(uploadPath));
+app.use('/uploads', express.static(resolve('./uploads')));
 
 // convert buffer data .....................
 app.set("trust proxy", true)
