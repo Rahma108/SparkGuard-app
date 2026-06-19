@@ -36,15 +36,16 @@ router.patch("/updateProfile",authentication(),async (req, res, next) => {
     }
 )
 
-router.patch('/profile-picture' ,
-    authentication()
-    ,upload("user/image", [...fieldValidation.image], 10)
-    .single("attachment"),
-    validation(validators.profilePicture)
-    , async(req , res , next )=>{
-    const account = await profilePicture(req.file ,  req.user )
-    return successResponse({res ,result:{account} })
-})
+router.patch(
+    '/profile-picture',
+    authentication(),
+    upload("general", [...fieldValidation.image], 10).single("attachment"),
+    validation(validators.profilePicture),
+    async (req, res) => {
+        const account = await profilePicture(req.file, req.user);
+        return successResponse({ res, result: { account } });
+    }
+);
 
 router.delete('/remove-profile-picture' ,
     authentication()

@@ -1,3 +1,4 @@
+import { BASE_URL } from "../../../config/config.service.js";
 import { AdminApproachEnum } from "../../common/enums/email.enum.js";
 import { RoleEnum } from "../../common/enums/user.enum.js";
 import { NotFoundException , BadRequestException } from "../../common/utils/index.js";
@@ -35,18 +36,27 @@ export const getPredictionsService = async () => {
     }));
 };
 
-// Get All Users In DB...
-export const getAllUsersService = async () => {
-    const users = await UserModel.find({ isDeleted: false , role: { $ne: RoleEnum.Admin } })
-        .select("email role _id");
-
-    return users.map(user => ({
+const mapUser = (user) => {
+    return {
         id: user._id,
         email: user.email,
-        role: user.role
-    }));
+        role: user.role,
+        status: user.status,
+        profilePicture: user.profilePicture
+            ? `${BASE_URL}/uploads/general/${user.profilePicture}`
+            : null
+    };
 };
 
+// Get All Users In DB...
+export const getAllUsersService = async () => {
+    const users = await UserModel.find({
+        isDeleted: false,
+        role: { $ne: RoleEnum.Admin }
+    }).select("email role _id profilePicture status");
+
+    return users.map(mapUser);
+};
 
 export const softDeleteUserService = async (userId) => {
 
@@ -116,28 +126,22 @@ export const restoreUserService = async (userId) => {
 
 // Get all Users Deleted ... btn deleted
 // getAllDeletedUsers
-export const getAllDeletedUsers= async () => {
-    const users = await UserModel.find({ isDeleted: true , role: { $ne: RoleEnum.Admin } })
-        .select("email role _id");
+export const getAllDeletedUsers = async () => {
+    const users = await UserModel.find({
+        isDeleted: true,
+        role: { $ne: RoleEnum.Admin }
+    }).select("email role _id profilePicture status");
 
-    return users.map(user => ({
-        id: user._id,
-        email: user.email,
-        role: user.role
-    }));
+    return users.map(mapUser);
 };
-
 // getAllActivated
-export const getAllActiveUsers= async () => {
-    const users = await UserModel.find({ status: AdminApproachEnum.ACTIVE , role: { $ne: RoleEnum.Admin } })
-        .select("email role _id status");
+export const getAllActiveUsers = async () => {
+    const users = await UserModel.find({
+        status: AdminApproachEnum.ACTIVE,
+        role: { $ne: RoleEnum.Admin }
+    }).select("email role _id profilePicture status");
 
-    return users.map(user => ({
-        id: user._id,
-        email: user.email,
-        role: user.role,
-        status:user.status
-    }));
+    return users.map(mapUser);
 };
 
 export const getAllRejectedUsers = async () => {

@@ -5,7 +5,7 @@ import { createLoginCredentials} from "../../common/utils/security/token.securit
 import { LogoutEnum } from '../../common/enums/security.enum.js';
 import {baseRevokeTokenKey, deleteKeys, keys, revokeTokenKey, set} from '../../common/services/index.js'
 import { compareHash, ConflictException, decrypt, generateHash } from "../../common/utils/index.js";
-import { ACCESS_EXPIRES_IN, REFRESH_EXPIRES_IN } from "../../../config/config.service.js";
+import { ACCESS_EXPIRES_IN, BASE_URL, REFRESH_EXPIRES_IN } from "../../../config/config.service.js";
 import fs from 'fs'
 import path, { resolve } from 'node:path';
 
@@ -37,15 +37,22 @@ export const dashboard = async () => {
 
     return data
 }
-export const profile= async  (user)=>{
+export const profile = async (user) => {
     if (!user) {
-    throw new Error("User not found");
+        throw new Error("User not found");
     }
-    if (user.phone) user.phone = decrypt(user.phone);
-    return  {userName: user.userName,
-    email: user.email}
-}
 
+    if (user.phone) user.phone = decrypt(user.phone);
+
+
+    return {
+        userName: user.userName,
+        email: user.email,
+        profilePicture: user.profilePicture
+        ? `${BASE_URL}/uploads/general/${user.profilePicture}`
+          : null
+    };
+};
 
 export const updatedProfile= async  (user , data)=>{
     const { userName } =data
@@ -84,10 +91,14 @@ export const profilePicture = async (file, user) => {
 
     return {
         message: "Profile picture uploaded successfully ✅",
-        finalPath: file.finalPath,         
+        finalPath: file.finalPath, 
+        imageUrl: `${BASE_URL}/uploads/general/${file.filename}`,        
         filename: file.filename
     };
 };
+
+
+
 export const removeProfilePicture = async (user) => {
 
     if (!user.profilePicture) {
